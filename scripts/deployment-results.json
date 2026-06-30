@@ -1,0 +1,19 @@
+{
+  "network": "casper-test",
+  "deployer": "020394CCdB983b7B2a88486448E5d170F737A80264d32CaB99A3e2a3e01f33D6CEa1",
+  "contracts": {
+    "AssetRegistry": {
+      "deployHash": "e69b9da937de5ea373274a1e982cfc047818e8a8774bb2899f1e758e76e47e40",
+      "contractHash": "hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec",
+      "blockHeight": 8330843,
+      "explorerUrl": "https://testnet.cspr.live/deploy/e69b9da937de5ea373274a1e982cfc047818e8a8774bb2899f1e758e76e47e40"
+    }
+  },
+  "transactions": {
+    "mintAsset": {
+      "deployHash": "327382489325d57605753e406cf41cc1fa5cb3bd7bf9c32b5b8d0c077f9cbfcd",
+      "blockHeight": 8330846,
+      "explorerUrl": "https://testnet.cspr.live/deploy/327382489325d57605753e406cf41cc1fa5cb3bd7bf9c32b5b8d0c077f9cbfcd"
+    }
+  }
+}

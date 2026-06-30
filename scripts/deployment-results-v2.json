@@ -1,0 +1,16 @@
+{
+  "network": "casper-test",
+  "deployer": "020394CCdB983b7B2a88486448E5d170F737A80264d32CaB99A3e2a3e01f33D6CEa1",
+  "contracts": {
+    "CarbonCredit": {
+      "deployHash": "1099eed33b0bd0db0062152a7026f670f73f26edea4427c115f8b341debe13cb",
+      "contractHash": "hash-95dfa71608ce06624e791543fafb6e5cc5924b1928e2414ae83edb08659cb686",
+      "explorerUrl": "https://testnet.cspr.live/deploy/1099eed33b0bd0db0062152a7026f670f73f26edea4427c115f8b341debe13cb"
+    },
+    "FractionalRegistry": {
+      "deployHash": "c2fe89ca4e5623d83cb51e704466f0ee65c9af4ecfbc0159f75900ca6c64eee5",
+      "contractHash": "hash-420db8acf6991ae16515426d43f50a4215f58fa400724c9ffe4b61d04375271b",
+      "explorerUrl": "https://testnet.cspr.live/deploy/c2fe89ca4e5623d83cb51e704466f0ee65c9af4ecfbc0159f75900ca6c64eee5"
+    }
+  }
+}
