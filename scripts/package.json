@@ -1,0 +1,20 @@
+{
+  "name": "assetpilot-scripts",
+  "version": "0.1.0",
+  "description": "AssetPilot E2E simulation scripts",
+  "scripts": {
+    "simulate": "ts-node simulate-ecosystem.ts"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "casper-js-sdk": "^2.15.2",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.4.5",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
