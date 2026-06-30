@@ -1,0 +1,2067 @@
+{
+  "assets": [
+    {
+      "id": "1",
+      "asset_id": 1,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Agricultural Tractor",
+      "make": "Komatsu",
+      "model_est": "Komatsu PC88 Excavator",
+      "valuation_usd": 184000,
+      "condition_score": 82,
+      "ipfs_photo_hash": "QmTest123",
+      "status": "Rented",
+      "created_at": "2026-06-29T04:15:54.612Z",
+      "updated_at": "2026-06-29T04:15:54.612Z",
+      "mint_tx_hash": "e69b9da937de5ea373274a1e982cfc047818e8a8774bb2899f1e758e76e47e40"
+    },
+    {
+      "id": "2",
+      "asset_id": 2,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Marine Work Vessel",
+      "make": "Workboat",
+      "model_est": "Marine Work Vessel 12m",
+      "valuation_usd": 620000,
+      "condition_score": 90,
+      "ipfs_photo_hash": "QmTest456",
+      "status": "Listed",
+      "created_at": "2026-06-29T04:15:54.612Z",
+      "updated_at": "2026-06-29T04:15:54.612Z",
+      "mint_tx_hash": "mock_tx_2"
+    },
+    {
+      "id": "3",
+      "asset_id": 3,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Heavy Generator",
+      "make": "Caterpillar",
+      "model_est": "Caterpillar XQ230 Generator",
+      "valuation_usd": 290000,
+      "condition_score": 88,
+      "ipfs_photo_hash": "QmTest789",
+      "status": "Idle",
+      "created_at": "2026-06-29T04:15:54.612Z",
+      "updated_at": "2026-06-29T04:15:54.612Z",
+      "mint_tx_hash": "mock_tx_3"
+    }
+  ],
+  "loans": [
+    {
+      "id": "1",
+      "asset_id": 1,
+      "borrower_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "principal_motes": "100000000000",
+      "remaining_motes": "74000000000",
+      "ltv_bps": 7400,
+      "status": "Active",
+      "originated_at": "2026-06-29T04:15:54.612Z"
+    }
+  ],
+  "rentals": [
+    {
+      "id": "1",
+      "rental_id": 101,
+      "asset_id": 1,
+      "renter_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "rate_per_minute": "68000000",
+      "rate_usd_per_hour": 15,
+      "duration_minutes": 60,
+      "total_streamed": "84217000000",
+      "status": "Active",
+      "started_at": "2026-06-29T04:15:54.612Z"
+    }
+  ],
+  "agent_logs": [
+    {
+      "id": "1782750465884",
+      "timestamp": "2026-06-29T16:27:45.884Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MQZFLJ6J"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1782750509692",
+      "timestamp": "2026-06-29T16:28:29.692Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MQZFMGZE"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1782751440061",
+      "timestamp": "2026-06-29T16:44:00.061Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394CCdB983b7B2a88486448E5d170F737A80264d32CaB99A3e2a3e01f33D6CEa1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782751919092",
+      "timestamp": "2026-06-29T16:51:59.092Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394CCdB983b7B2a88486448E5d170F737A80264d32CaB99A3e2a3e01f33D6CEa1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755581081",
+      "timestamp": "2026-06-29T17:53:01.081Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755586582",
+      "timestamp": "2026-06-29T17:53:06.582Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755591572",
+      "timestamp": "2026-06-29T17:53:11.572Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755596584",
+      "timestamp": "2026-06-29T17:53:16.584Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755601572",
+      "timestamp": "2026-06-29T17:53:21.572Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755606588",
+      "timestamp": "2026-06-29T17:53:26.588Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755612281",
+      "timestamp": "2026-06-29T17:53:32.281Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755617282",
+      "timestamp": "2026-06-29T17:53:37.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755622286",
+      "timestamp": "2026-06-29T17:53:42.286Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755627285",
+      "timestamp": "2026-06-29T17:53:47.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755631574",
+      "timestamp": "2026-06-29T17:53:51.574Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755636576",
+      "timestamp": "2026-06-29T17:53:56.576Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755641576",
+      "timestamp": "2026-06-29T17:54:01.576Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755646577",
+      "timestamp": "2026-06-29T17:54:06.577Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755651578",
+      "timestamp": "2026-06-29T17:54:11.578Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755656591",
+      "timestamp": "2026-06-29T17:54:16.591Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755662285",
+      "timestamp": "2026-06-29T17:54:22.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755667282",
+      "timestamp": "2026-06-29T17:54:27.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755671570",
+      "timestamp": "2026-06-29T17:54:31.570Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755676582",
+      "timestamp": "2026-06-29T17:54:36.582Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755681587",
+      "timestamp": "2026-06-29T17:54:41.587Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755686577",
+      "timestamp": "2026-06-29T17:54:46.577Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755691573",
+      "timestamp": "2026-06-29T17:54:51.573Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755696569",
+      "timestamp": "2026-06-29T17:54:56.569Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755702291",
+      "timestamp": "2026-06-29T17:55:02.291Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755708273",
+      "timestamp": "2026-06-29T17:55:08.273Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755712279",
+      "timestamp": "2026-06-29T17:55:12.279Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755717284",
+      "timestamp": "2026-06-29T17:55:17.284Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755722281",
+      "timestamp": "2026-06-29T17:55:22.281Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755724138",
+      "timestamp": "2026-06-29T17:55:24.138Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755729267",
+      "timestamp": "2026-06-29T17:55:29.267Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755734274",
+      "timestamp": "2026-06-29T17:55:34.274Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755739289",
+      "timestamp": "2026-06-29T17:55:39.289Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755744275",
+      "timestamp": "2026-06-29T17:55:44.275Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755749283",
+      "timestamp": "2026-06-29T17:55:49.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755754273",
+      "timestamp": "2026-06-29T17:55:54.273Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755759285",
+      "timestamp": "2026-06-29T17:55:59.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755764132",
+      "timestamp": "2026-06-29T17:56:04.132Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755769155",
+      "timestamp": "2026-06-29T17:56:09.155Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755774131",
+      "timestamp": "2026-06-29T17:56:14.131Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755779138",
+      "timestamp": "2026-06-29T17:56:19.138Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755784134",
+      "timestamp": "2026-06-29T17:56:24.134Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755789151",
+      "timestamp": "2026-06-29T17:56:29.151Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755794154",
+      "timestamp": "2026-06-29T17:56:34.154Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755799140",
+      "timestamp": "2026-06-29T17:56:39.140Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755804137",
+      "timestamp": "2026-06-29T17:56:44.137Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755809145",
+      "timestamp": "2026-06-29T17:56:49.145Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755814143",
+      "timestamp": "2026-06-29T17:56:54.143Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755819136",
+      "timestamp": "2026-06-29T17:56:59.136Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755824132",
+      "timestamp": "2026-06-29T17:57:04.132Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755829133",
+      "timestamp": "2026-06-29T17:57:09.133Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755834142",
+      "timestamp": "2026-06-29T17:57:14.143Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755839147",
+      "timestamp": "2026-06-29T17:57:19.147Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755844148",
+      "timestamp": "2026-06-29T17:57:24.148Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755849138",
+      "timestamp": "2026-06-29T17:57:29.138Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755854147",
+      "timestamp": "2026-06-29T17:57:34.147Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755859142",
+      "timestamp": "2026-06-29T17:57:39.142Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755864133",
+      "timestamp": "2026-06-29T17:57:44.133Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755869142",
+      "timestamp": "2026-06-29T17:57:49.142Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755874130",
+      "timestamp": "2026-06-29T17:57:54.130Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755879143",
+      "timestamp": "2026-06-29T17:57:59.143Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755884125",
+      "timestamp": "2026-06-29T17:58:04.125Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755889142",
+      "timestamp": "2026-06-29T17:58:09.142Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755894150",
+      "timestamp": "2026-06-29T17:58:14.150Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755899150",
+      "timestamp": "2026-06-29T17:58:19.150Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755904139",
+      "timestamp": "2026-06-29T17:58:24.139Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755909151",
+      "timestamp": "2026-06-29T17:58:29.151Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755914147",
+      "timestamp": "2026-06-29T17:58:34.147Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755919136",
+      "timestamp": "2026-06-29T17:58:39.136Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755924153",
+      "timestamp": "2026-06-29T17:58:44.153Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755929143",
+      "timestamp": "2026-06-29T17:58:49.143Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755934152",
+      "timestamp": "2026-06-29T17:58:54.152Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755939141",
+      "timestamp": "2026-06-29T17:58:59.141Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755944148",
+      "timestamp": "2026-06-29T17:59:04.148Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755949146",
+      "timestamp": "2026-06-29T17:59:09.146Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755954142",
+      "timestamp": "2026-06-29T17:59:14.142Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755959136",
+      "timestamp": "2026-06-29T17:59:19.136Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755964141",
+      "timestamp": "2026-06-29T17:59:24.141Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755969139",
+      "timestamp": "2026-06-29T17:59:29.139Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755974146",
+      "timestamp": "2026-06-29T17:59:34.146Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755979129",
+      "timestamp": "2026-06-29T17:59:39.129Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755984139",
+      "timestamp": "2026-06-29T17:59:44.139Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755989139",
+      "timestamp": "2026-06-29T17:59:49.139Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755994145",
+      "timestamp": "2026-06-29T17:59:54.145Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782755999135",
+      "timestamp": "2026-06-29T17:59:59.135Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756004144",
+      "timestamp": "2026-06-29T18:00:04.144Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756009137",
+      "timestamp": "2026-06-29T18:00:09.137Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756014142",
+      "timestamp": "2026-06-29T18:00:14.142Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756019143",
+      "timestamp": "2026-06-29T18:00:19.143Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756024151",
+      "timestamp": "2026-06-29T18:00:24.151Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756029271",
+      "timestamp": "2026-06-29T18:00:29.271Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756034287",
+      "timestamp": "2026-06-29T18:00:34.287Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756039279",
+      "timestamp": "2026-06-29T18:00:39.279Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756044277",
+      "timestamp": "2026-06-29T18:00:44.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756049285",
+      "timestamp": "2026-06-29T18:00:49.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756054302",
+      "timestamp": "2026-06-29T18:00:54.302Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756059278",
+      "timestamp": "2026-06-29T18:00:59.278Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756064285",
+      "timestamp": "2026-06-29T18:01:04.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756069275",
+      "timestamp": "2026-06-29T18:01:09.275Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756074290",
+      "timestamp": "2026-06-29T18:01:14.290Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756079278",
+      "timestamp": "2026-06-29T18:01:19.278Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756084284",
+      "timestamp": "2026-06-29T18:01:24.284Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756089278",
+      "timestamp": "2026-06-29T18:01:29.278Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756094278",
+      "timestamp": "2026-06-29T18:01:34.278Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756099274",
+      "timestamp": "2026-06-29T18:01:39.274Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756104282",
+      "timestamp": "2026-06-29T18:01:44.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756109283",
+      "timestamp": "2026-06-29T18:01:49.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756114285",
+      "timestamp": "2026-06-29T18:01:54.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756119287",
+      "timestamp": "2026-06-29T18:01:59.287Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756124289",
+      "timestamp": "2026-06-29T18:02:04.289Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756129280",
+      "timestamp": "2026-06-29T18:02:09.280Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756134346",
+      "timestamp": "2026-06-29T18:02:14.346Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756139275",
+      "timestamp": "2026-06-29T18:02:19.275Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756144280",
+      "timestamp": "2026-06-29T18:02:24.280Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756149286",
+      "timestamp": "2026-06-29T18:02:29.286Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756154279",
+      "timestamp": "2026-06-29T18:02:34.279Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756159286",
+      "timestamp": "2026-06-29T18:02:39.286Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756164287",
+      "timestamp": "2026-06-29T18:02:44.287Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756169290",
+      "timestamp": "2026-06-29T18:02:49.290Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756174287",
+      "timestamp": "2026-06-29T18:02:54.287Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756179282",
+      "timestamp": "2026-06-29T18:02:59.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756184289",
+      "timestamp": "2026-06-29T18:03:04.289Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756189288",
+      "timestamp": "2026-06-29T18:03:09.288Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756194305",
+      "timestamp": "2026-06-29T18:03:14.305Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756199277",
+      "timestamp": "2026-06-29T18:03:19.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756204289",
+      "timestamp": "2026-06-29T18:03:24.289Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756209291",
+      "timestamp": "2026-06-29T18:03:29.291Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756214288",
+      "timestamp": "2026-06-29T18:03:34.288Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756219282",
+      "timestamp": "2026-06-29T18:03:39.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756224285",
+      "timestamp": "2026-06-29T18:03:44.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756229283",
+      "timestamp": "2026-06-29T18:03:49.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756234284",
+      "timestamp": "2026-06-29T18:03:54.284Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756239290",
+      "timestamp": "2026-06-29T18:03:59.290Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756244277",
+      "timestamp": "2026-06-29T18:04:04.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756249282",
+      "timestamp": "2026-06-29T18:04:09.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756254286",
+      "timestamp": "2026-06-29T18:04:14.286Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756259289",
+      "timestamp": "2026-06-29T18:04:19.289Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756264287",
+      "timestamp": "2026-06-29T18:04:24.287Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756269277",
+      "timestamp": "2026-06-29T18:04:29.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756274284",
+      "timestamp": "2026-06-29T18:04:34.284Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756279277",
+      "timestamp": "2026-06-29T18:04:39.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756284288",
+      "timestamp": "2026-06-29T18:04:44.288Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756289273",
+      "timestamp": "2026-06-29T18:04:49.273Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756294282",
+      "timestamp": "2026-06-29T18:04:54.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756299286",
+      "timestamp": "2026-06-29T18:04:59.286Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756304275",
+      "timestamp": "2026-06-29T18:05:04.275Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756309281",
+      "timestamp": "2026-06-29T18:05:09.282Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756314283",
+      "timestamp": "2026-06-29T18:05:14.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756319297",
+      "timestamp": "2026-06-29T18:05:19.297Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756332277",
+      "timestamp": "2026-06-29T18:05:32.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756392285",
+      "timestamp": "2026-06-29T18:06:32.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756452285",
+      "timestamp": "2026-06-29T18:07:32.285Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756512307",
+      "timestamp": "2026-06-29T18:08:32.307Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756572279",
+      "timestamp": "2026-06-29T18:09:32.279Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756632546",
+      "timestamp": "2026-06-29T18:10:32.546Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756692279",
+      "timestamp": "2026-06-29T18:11:32.279Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756752300",
+      "timestamp": "2026-06-29T18:12:32.300Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756812277",
+      "timestamp": "2026-06-29T18:13:32.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756872301",
+      "timestamp": "2026-06-29T18:14:32.301Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756932308",
+      "timestamp": "2026-06-29T18:15:32.308Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782756992311",
+      "timestamp": "2026-06-29T18:16:32.311Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757052269",
+      "timestamp": "2026-06-29T18:17:32.269Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757112291",
+      "timestamp": "2026-06-29T18:18:32.291Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757172301",
+      "timestamp": "2026-06-29T18:19:32.301Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757233008",
+      "timestamp": "2026-06-29T18:20:33.008Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757238269",
+      "timestamp": "2026-06-29T18:20:38.269Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757243280",
+      "timestamp": "2026-06-29T18:20:43.280Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757248283",
+      "timestamp": "2026-06-29T18:20:48.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757253291",
+      "timestamp": "2026-06-29T18:20:53.291Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757258277",
+      "timestamp": "2026-06-29T18:20:58.277Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757263273",
+      "timestamp": "2026-06-29T18:21:03.273Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757268272",
+      "timestamp": "2026-06-29T18:21:08.272Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757273288",
+      "timestamp": "2026-06-29T18:21:13.288Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757278270",
+      "timestamp": "2026-06-29T18:21:18.270Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757283276",
+      "timestamp": "2026-06-29T18:21:23.276Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757288512",
+      "timestamp": "2026-06-29T18:21:28.512Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757306105",
+      "timestamp": "2026-06-29T18:21:46.105Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757311281",
+      "timestamp": "2026-06-29T18:21:51.281Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757316274",
+      "timestamp": "2026-06-29T18:21:56.274Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757321272",
+      "timestamp": "2026-06-29T18:22:01.272Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757326283",
+      "timestamp": "2026-06-29T18:22:06.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757331289",
+      "timestamp": "2026-06-29T18:22:11.289Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757336288",
+      "timestamp": "2026-06-29T18:22:16.288Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757341283",
+      "timestamp": "2026-06-29T18:22:21.284Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757346290",
+      "timestamp": "2026-06-29T18:22:26.290Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757351287",
+      "timestamp": "2026-06-29T18:22:31.287Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757356283",
+      "timestamp": "2026-06-29T18:22:36.283Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757361278",
+      "timestamp": "2026-06-29T18:22:41.278Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757412291",
+      "timestamp": "2026-06-29T18:23:32.291Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757472275",
+      "timestamp": "2026-06-29T18:24:32.275Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757532301",
+      "timestamp": "2026-06-29T18:25:32.301Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757592279",
+      "timestamp": "2026-06-29T18:26:32.279Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782757652320",
+      "timestamp": "2026-06-29T18:27:32.320Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/carbon/history/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "payload": {
+        "message": "Cannot read properties of null (reading 'from')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1782758341856",
+      "timestamp": "2026-06-29T18:39:01.856Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MQZKACBI"
+      },
+      "status": "success"
+    }
+  ]
+}

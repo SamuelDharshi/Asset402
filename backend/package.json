@@ -1,0 +1,26 @@
+{
+  "name": "asset402-backend",
+  "version": "0.1.0",
+  "description": "Asset402 API Gateway — Node + Hono + Supabase",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.0",
+    "@supabase/supabase-js": "^2.44.2",
+    "dotenv": "^16.4.5",
+    "eventsource": "^2.0.2",
+    "hono": "^4.4.11"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/eventsource": "^1.1.15",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
+    "tsx": "^4.22.4",
+    "typescript": "^5.5.3"
+  }
+}
