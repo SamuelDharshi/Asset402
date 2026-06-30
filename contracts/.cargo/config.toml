@@ -1,0 +1,9 @@
+[target.wasm32-unknown-unknown]
+rustflags = [
+    "-C", "link-arg=--allow-undefined",
+    "-C", "target-feature=-bulk-memory,-sign-ext"
+]
+
+[unstable]
+build-std = ["core", "alloc"]
+build-std-features = ["compiler-builtins-mem"]

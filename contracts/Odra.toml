@@ -1,0 +1,14 @@
+[[contracts]]
+fqn = "rental_escrow::RentalEscrow"
+
+[[contracts]]
+fqn = "asset_registry::AssetRegistry"
+
+[[contracts]]
+fqn = "lending_pool::LendingPool"
+
+[[contracts]]
+fqn = "fractional_registry::FractionalRegistry"
+
+[[contracts]]
+fqn = "carbon_credits::CarbonCredit"
