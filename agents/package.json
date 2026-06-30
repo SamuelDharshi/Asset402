@@ -1,0 +1,39 @@
+{
+  "name": "asset402-agents",
+  "version": "0.1.0",
+  "description": "Asset402 multi-agent orchestration system",
+  "main": "dist/orchestrator.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/orchestrator.ts",
+    "start": "node dist/orchestrator.js",
+    "test": "jest --passWithNoTests",
+    "mock-oracle": "ts-node src/x402/mock-server.ts"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "@langchain/openai": "^0.3.0",
+    "axios": "^1.7.2",
+    "casper-js-sdk": "^2.15.2",
+    "dotenv": "^16.4.5",
+    "eventemitter3": "^5.0.1",
+    "express": "^4.19.2",
+    "js-sha256": "^0.11.0",
+    "langchain": "^0.3.0",
+    "node-cron": "^3.0.3",
+    "tweetnacl": "^1.0.3",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.9",
+    "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^10.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.2",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.3"
+  }
+}
