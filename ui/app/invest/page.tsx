@@ -108,7 +108,10 @@ export default function InvestPage() {
   }, []);
 
   const handleBuy = async (offeringId: number) => {
-    if (!isConnected) { await connect(); return; }
+    if (!isConnected) {
+      try { await connect(); } catch (e) { console.warn('Wallet connect failed:', e); }
+      return;
+    }
     setPurchasing(offeringId);
     setTimeout(() => {
       setConfirmed(prev => new Set([...prev, offeringId]));

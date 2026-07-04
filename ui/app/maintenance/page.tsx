@@ -77,7 +77,14 @@ export default function MaintenancePage() {
 
   const handleApprove = async (assetId: number, provider: MaintenancePrediction['nearest_provider']) => {
     if (!provider) return;
-    if (!isConnected) { await connect(); return; }
+    if (!isConnected) {
+      try {
+        await connect();
+      } catch (e) {
+        console.warn('Wallet connect failed:', e);
+      }
+      return;
+    }
     setApproving(assetId);
     const address = activeAccount ?? 'demo-account';
     const message = `Approve maintenance booking: asset #${assetId} — ${provider.name} — $${provider.cost_usd} USD`;

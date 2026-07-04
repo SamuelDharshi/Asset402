@@ -59,7 +59,10 @@ export default function CarbonPage() {
   const handleRedeem = async () => {
     const amount = parseFloat(redeemAmount);
     if (!amount || amount <= 0) return;
-    if (!isConnected) { await connect(); return; }
+    if (!isConnected) {
+      try { await connect(); } catch (e) { console.warn('Wallet connect failed:', e); }
+      return;
+    }
     const address = activeAccount ?? CONTRACTS.deployer;
     setRedeemStatus('pending');
     try {

@@ -30,6 +30,16 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
   const { isConnected, activeAccount, connect, disconnect } = useClick()
+  const [connectError, setConnectError] = useState<string | null>(null)
+
+  const handleConnect = async () => {
+    try {
+      setConnectError(null)
+      await connect()
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : "Failed to connect wallet")
+    }
+  }
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/"
@@ -120,12 +130,20 @@ export function Header() {
                   {activeAccount?.slice(0, 6)}...{activeAccount?.slice(-4)}
                 </button>
               ) : (
-                <button
-                  onClick={connect}
-                  className="rounded-lg border border-border bg-card px-4 py-2 font-mono text-xs text-muted-foreground transition-all duration-300 hover:border-primary hover:text-primary hover:bg-primary/10"
-                >
-                  connect wallet
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={handleConnect}
+                    title={connectError ?? undefined}
+                    className="rounded-lg border border-border bg-card px-4 py-2 font-mono text-xs text-muted-foreground transition-all duration-300 hover:border-primary hover:text-primary hover:bg-primary/10"
+                  >
+                    connect wallet
+                  </button>
+                  {connectError && (
+                    <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-destructive/50 bg-card p-2 text-xs text-destructive shadow-lg z-50">
+                      {connectError}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
