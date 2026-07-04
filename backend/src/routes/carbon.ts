@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Hono } from 'hono';
-import { supabase, logRepo } from '../db/supabase';
+import { isMockDb, logRepo, loanRepo } from '../db/supabase';
 
 export const carbonRouter = new Hono();
 
@@ -14,18 +14,13 @@ export const carbonRouter = new Hono();
 
 carbonRouter.get('/balance/:address', async (c) => {
   const address = c.req.param('address');
-  const isMockDb = !process.env['SUPABASE_URL'] || process.env['SUPABASE_URL'] === '';
 
   if (isMockDb) {
-    // In mock mode: return a stored balance from agent_logs
-    const { data: logs } = await (await import('../db/supabase')).supabase
-      .from('agent_logs')
-      .select('payload')
-      .eq('agent_name', 'CollectorAgent')
-      .like('action_performed', '%CUC%')
-      .order('timestamp', { ascending: false });
-
-    const cucIssued = logs?.length ?? 0;
+    // In mock mode: derive a balance from the local agent_logs history via
+    // the repo layer (never touches the raw supabase client, which is null
+    // in this mode).
+    const logs = await logRepo.findCarbonRelated('CollectorAgent', 1000);
+    const cucIssued = logs.length;
     // Simulate a balance (mock balances that increase with each CUC issuance)
     return c.json({
       address,
@@ -86,15 +81,12 @@ carbonRouter.get('/balance/:address', async (c) => {
 carbonRouter.get('/history/:address', async (c) => {
   const address = c.req.param('address');
 
-  const { data: logs } = await supabase
-    .from('agent_logs')
-    .select('*')
-    .eq('agent_name', 'CollectorAgent')
-    .or(`action_performed.like.%CUC%,action_performed.like.%carbon%`)
-    .order('timestamp', { ascending: false })
-    .limit(50);
+  // Routed through logRepo (mock-mode-aware) instead of calling the raw
+  // supabase client directly — that client is null in mock mode, which is
+  // exactly what was crashing this route on every request before.
+  const logs = await logRepo.findCarbonRelated('CollectorAgent', 50);
 
-  const history = (logs ?? []).map((log: any) => ({
+  const history = logs.map((log) => ({
     action: log.action_performed,
     timestamp: log.timestamp,
     payload: log.payload,
@@ -106,9 +98,18 @@ carbonRouter.get('/history/:address', async (c) => {
 
 // ── POST /api/v1/carbon/redeem ───────────────────────────────────────────────
 // Redeem CUCs for a rental fee discount.
-// Implementation: the loan record gets a rent_discount_motes field.
-// In production this would also call CarbonCredit.transfer(to_protocol, amount).
-// No contract redeployment required — discount is applied at payment processing time.
+//
+// The CarbonCredit contract now has a real `redeem_for_discount(amount)`
+// entrypoint (contracts/carbon_credits/src/lib.rs) that burns milliCUC from
+// `env().caller()`'s own balance and returns a DiscountVoucher. That
+// entrypoint MUST be called by the CUC holder's own wallet — burning from
+// "caller", not from an address parameter — so the backend agent key cannot
+// submit it on the redeemer's behalf without impersonating them. Wiring
+// this fully means the frontend prepares the deploy and the user's
+// CSPR.click wallet signs it directly, then this route (or a follow-up one)
+// verifies the resulting deploy before applying the loan discount below.
+// That client-signing step is not yet built, so this route still applies
+// the discount to the off-chain loan record only.
 
 carbonRouter.post('/redeem', async (c) => {
   const body = await c.req.json<{
@@ -135,11 +136,13 @@ carbonRouter.post('/redeem', async (c) => {
   // If an active rental is specified, record the discount on the loan
   if (rentalId && assetId) {
     // Convert milliCUC to CSPR motes at current rate (1 CUC = $1 discount, CSPR at $0.0234)
-    const discountMotes = Math.floor((amountMilliCuc / 1000) / 0.0234 * 1_000_000_000);
-    await (await import('../db/supabase')).supabase
-      .from('loans')
-      .update({ remaining_motes: (BigInt(0) - BigInt(discountMotes)).toString() } as any)
-      .eq('asset_id', assetId);
+    const discountMotes = BigInt(Math.floor((amountMilliCuc / 1000) / 0.0234 * 1_000_000_000));
+    const loan = await loanRepo.findByAssetId(assetId);
+    if (loan) {
+      const currentRemaining = BigInt(loan.remaining_motes);
+      const newRemaining = currentRemaining > discountMotes ? currentRemaining - discountMotes : 0n;
+      await loanRepo.updateRemaining(assetId, newRemaining.toString(), newRemaining === 0n ? 'Repaid' : undefined);
+    }
   }
 
   return c.json({

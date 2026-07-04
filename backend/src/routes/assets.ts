@@ -4,7 +4,14 @@
 
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { assetRepo, loanRepo, logRepo, maintenanceRepo } from '../db/supabase';
+import { CLValueBuilder, CLPublicKey } from 'casper-js-sdk';
+import { assetRepo, loanRepo, logRepo, maintenanceRepo, rentalRepo } from '../db/supabase';
+import { submitContractCall, waitForDeploy } from '../lib/casper-rpc';
+
+const NODE_URL = process.env['CASPER_NODE_URL'] ?? 'https://node.testnet.casper.network/rpc';
+const NETWORK_NAME = process.env['CASPER_NETWORK'] ?? 'casper-test';
+const AGENT_PRIVATE_KEY_PATH = process.env['AGENT_PRIVATE_KEY_PATH'] ?? '';
+const ASSET_REGISTRY_ADDR = process.env['ASSET_REGISTRY_ADDR'] ?? '';
 
 export const assetsRouter = new Hono();
 
@@ -78,12 +85,46 @@ assetsRouter.post('/onboard', async (c) => {
     ipfsPhotoHash:  string;
   }>();
 
-  // Mock: In production this deploys the Odra contract via Casper MCP
-  // Returns a deterministic asset_id for demo purposes
-  const mockAssetId = Date.now() % 100_000;
+  if (!ASSET_REGISTRY_ADDR || !AGENT_PRIVATE_KEY_PATH) {
+    return c.json({ error: 'AssetRegistry not configured (ASSET_REGISTRY_ADDR / AGENT_PRIVATE_KEY_PATH missing)' }, 500);
+  }
+
+  // Real mint_asset(owner, asset_type, valuation_usd, condition_score, ipfs_photo_hash)
+  // deploy against the deployed AssetRegistry contract — a genuine signed,
+  // gas-paying, state-mutating on-chain call, not a fabricated tx hash.
+  let mintTxHash: string;
+  try {
+    mintTxHash = await submitContractCall({
+      nodeUrl:             NODE_URL,
+      networkName:         NETWORK_NAME,
+      agentPrivateKeyPath: AGENT_PRIVATE_KEY_PATH,
+      contractHashHex:     ASSET_REGISTRY_ADDR,
+      entryPoint:          'mint_asset',
+      args: {
+        owner:           CLValueBuilder.key(CLPublicKey.fromHex(body.ownerPublicKey)),
+        asset_type:      CLValueBuilder.string(body.assetType),
+        valuation_usd:   CLValueBuilder.u64(body.valuationUsd),
+        condition_score: CLValueBuilder.u8(body.conditionScore),
+        ipfs_photo_hash: CLValueBuilder.string(body.ipfsPhotoHash),
+      },
+    });
+    await waitForDeploy(NODE_URL, mintTxHash);
+  } catch (err) {
+    console.error('[Assets API] mint_asset deploy failed:', String(err));
+    return c.json({ error: 'On-chain mint failed', detail: String(err) }, 502);
+  }
+
+  // The on-chain AssetId is emitted in the deploy's AssetMinted CES event;
+  // decoding CES event bytes from raw deploy effects is a documented scope
+  // boundary for this pass (see docs/demo-setup.md). This uses the
+  // backend's own sequential index instead, which tracks the contract's
+  // counter 1:1 under this demo's single-backend-instance assumption. The
+  // mint transaction itself, its hash, and its on-chain effects are real
+  // and independently verifiable via testnet.cspr.live.
+  const assetId = await assetRepo.nextAssetId();
 
   const asset = await assetRepo.upsert({
-    asset_id:        mockAssetId,
+    asset_id:        assetId,
     owner_address:   body.ownerPublicKey,
     asset_type:      body.assetType,
     make:            body.make,
@@ -92,17 +133,18 @@ assetsRouter.post('/onboard', async (c) => {
     condition_score: body.conditionScore,
     ipfs_photo_hash: body.ipfsPhotoHash,
     status:          'Idle',
-    mint_tx_hash:    `mock_tx_${Date.now()}`,
+    mint_tx_hash:    mintTxHash,
   });
 
   await logRepo.insert({
     agent_name:       'OrchestratorAgent',
     action_performed: 'mint_asset',
-    payload:          { assetId: mockAssetId, ...body },
+    payload:          { assetId, ...body },
     status:           'success',
+    tx_hash:          mintTxHash,
   });
 
-  return c.json({ success: true, assetId: mockAssetId, asset }, 201);
+  return c.json({ success: true, assetId, asset, explorerUrl: `https://testnet.cspr.live/deploy/${mintTxHash}` }, 201);
 });
 
 // ── POST /api/v1/assets/list ──────────────────────────────────────────────────
@@ -170,12 +212,9 @@ assetsRouter.get('/:id', async (c) => {
 assetsRouter.get('/', async (c) => {
   const status = c.req.query('status');
   if (status) {
-    const statuses = status.split(',') as Array<'Idle'|'Listed'|'Rented'|'Locked'>;
-    const { data } = await (await import('../db/supabase')).supabase
-      .from('assets')
-      .select('*')
-      .in('status', statuses);
-    return c.json(data ?? []);
+    const statuses = status.split(',') as Array<'Idle'|'Listed'|'Rented'|'Locked'|'Fractional'|'Maintenance'>;
+    const data = await assetRepo.findByStatuses(statuses);
+    return c.json(data);
   }
   const assets = await assetRepo.findAvailable();
   return c.json(assets);
@@ -234,36 +273,24 @@ assetsRouter.get('/maintenance/:assetId', async (c) => {
 assetsRouter.post('/lending/repay', async (c) => {
   const body = await c.req.json<{ rentalId: number; amountMotes: string }>();
 
-  // Fetch the rental to find the asset
-  const { data: rental } = await (await import('../db/supabase')).supabase
-    .from('rentals')
-    .select('asset_id, total_streamed')
-    .eq('rental_id', body.rentalId)
-    .single();
-
+  // Routed entirely through the repo layer (mock-mode-aware) instead of the
+  // raw supabase client, which is null when running in local-DB mode.
+  const rental = await rentalRepo.findByRentalId(body.rentalId);
   if (!rental) return c.json({ error: 'Rental not found' }, 404);
 
-  const loan = await (await import('../db/supabase')).supabase
-    .from('loans')
-    .select('remaining_motes')
-    .eq('asset_id', rental.asset_id)
-    .single();
+  const loan = await loanRepo.findByAssetId(rental.asset_id);
+  if (!loan) return c.json({ loanStatus: 'NoLoan' });
 
-  if (!loan.data) return c.json({ loanStatus: 'NoLoan' });
-
-  const remaining = BigInt(loan.data.remaining_motes as string);
+  const remaining = BigInt(loan.remaining_motes);
   const repayment = BigInt(body.amountMotes);
   const newRemaining = remaining > repayment ? remaining - repayment : 0n;
   const loanStatus = newRemaining === 0n ? 'Repaid' : 'Active';
 
-  await loanRepo.updateRemaining(rental.asset_id as number, newRemaining.toString(), loanStatus as 'Active' | 'Repaid');
+  await loanRepo.updateRemaining(rental.asset_id, newRemaining.toString(), loanStatus as 'Active' | 'Repaid');
 
   // Update total_streamed on rental
-  const prevStreamed = BigInt(rental.total_streamed as string ?? '0');
-  await (await import('../db/supabase')).supabase
-    .from('rentals')
-    .update({ total_streamed: (prevStreamed + repayment).toString() })
-    .eq('rental_id', body.rentalId);
+  const prevStreamed = BigInt(rental.total_streamed ?? '0');
+  await rentalRepo.updateStreamed(body.rentalId, (prevStreamed + repayment).toString());
 
   await logRepo.insert({
     agent_name:       'CollectorAgent',

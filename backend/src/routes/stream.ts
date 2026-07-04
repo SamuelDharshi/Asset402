@@ -4,22 +4,19 @@
 
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { supabase, rentalRepo, loanRepo, logRepo } from '../db/supabase';
+import { rentalRepo, loanRepo, logRepo, assetRepo } from '../db/supabase';
+import { verifyPayment, type PaymentProof } from '../lib/facilitator';
 
 export const streamRouter = new Hono();
+
+const NODE_URL = process.env['CASPER_NODE_URL'] ?? 'https://node.testnet.casper.network/rpc';
+const NETWORK_NAME = process.env['CASPER_NETWORK'] ?? 'casper-test';
 
 interface StreamPaymentBody {
   rentalId:     number;
   assetId:      number;
   amountMotes:  string;
-  paymentProof: {
-    network:   string;
-    recipient: string;
-    amount:    string;
-    signature: string;
-    publicKey: string;
-    timestamp: number;
-  };
+  paymentProof: PaymentProof;
   split:     {
     ownerMotes:       string;
     loanRepayMotes:   string;
@@ -98,35 +95,33 @@ streamRouter.post('/payment', async (c) => {
   const body = await c.req.json<StreamPaymentBody>();
   const { rentalId, assetId, amountMotes, split, loanActive, paymentProof } = body;
 
-  // ── 1. Verify payment proof signature ──────────────────────────────────────
-  // In production: call x402 Facilitator verification endpoint
-  const signatureAge = Date.now() - paymentProof.timestamp;
-  if (signatureAge > 5 * 60 * 1000) {
-    return c.json({ error: 'Payment proof expired' }, 400);
+  // ── 1. Verify the payment proof: real signature check + real on-chain
+  // RPC confirmation that a matching transfer actually landed. This is only
+  // called by CollectorAgent AFTER it has already executed the real
+  // transfer (see agents/src/collector-agent.ts:reportStreamPayment), so a
+  // real deployHash always exists here to verify against.
+  const verification = await verifyPayment(
+    paymentProof,
+    { recipient: paymentProof.recipient, amountMotes: BigInt(paymentProof.amount), network: NETWORK_NAME },
+    NODE_URL,
+  );
+  if (!verification.ok) {
+    return c.json({ error: 'Invalid payment proof', reason: verification.reason }, 403);
   }
 
   // ── 2. Update rental total_streamed ────────────────────────────────────────
-  const { data: rental } = await supabase
-    .from('rentals')
-    .select('total_streamed')
-    .eq('rental_id', rentalId)
-    .single();
-
-  const prevStreamed  = BigInt((rental as { total_streamed: string } | null)?.total_streamed ?? '0');
+  const rental = await rentalRepo.findByRentalId(rentalId);
+  const prevStreamed  = BigInt(rental?.total_streamed ?? '0');
   const newStreamed   = prevStreamed + BigInt(amountMotes);
   await rentalRepo.updateStreamed(rentalId, newStreamed.toString());
 
   // ── 3. Record loan repayment if active ─────────────────────────────────────
   let loanStatus: string = 'NoLoan';
   if (loanActive && BigInt(split.loanRepayMotes) > 0n) {
-    const { data: loan } = await supabase
-      .from('loans')
-      .select('remaining_motes')
-      .eq('asset_id', assetId)
-      .single();
+    const loan = await loanRepo.findByAssetId(assetId);
 
     if (loan) {
-      const remaining    = BigInt((loan as { remaining_motes: string }).remaining_motes);
+      const remaining    = BigInt(loan.remaining_motes);
       const repayment    = BigInt(split.loanRepayMotes);
       const newRemaining = remaining > repayment ? remaining - repayment : 0n;
       loanStatus         = newRemaining === 0n ? 'Repaid' : 'Active';
@@ -135,10 +130,7 @@ streamRouter.post('/payment', async (c) => {
 
       // If loan fully repaid, release asset collateral
       if (loanStatus === 'Repaid') {
-        await supabase
-          .from('assets')
-          .update({ status: 'Idle', updated_at: new Date().toISOString() })
-          .eq('asset_id', assetId);
+        await assetRepo.updateStatus(assetId, 'Idle');
       }
     }
   }

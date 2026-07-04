@@ -10,10 +10,28 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Hono } from 'hono';
-import { supabase, rentalRepo, assetRepo, logRepo } from '../db/supabase';
+import { CLValueBuilder, CLPublicKey } from 'casper-js-sdk';
+import { rentalRepo, assetRepo, logRepo } from '../db/supabase';
+import { submitContractCall, waitForDeploy } from '../lib/casper-rpc';
 import { log } from 'console';
 
+const NODE_URL = process.env['CASPER_NODE_URL'] ?? 'https://node.testnet.casper.network/rpc';
+const NETWORK_NAME = process.env['CASPER_NETWORK'] ?? 'casper-test';
+const AGENT_PRIVATE_KEY_PATH = process.env['AGENT_PRIVATE_KEY_PATH'] ?? '';
+const RENTAL_ESCROW_ADDR = process.env['RENTAL_ESCROW_ADDR'] ?? '';
+
 export const rentalsRouter = new Hono();
+
+// ── GET /api/v1/rentals/by-asset/:assetId ─────────────────────────────────────
+// assetId and rentalId are different ID spaces — the frontend needs this
+// lookup before it can subscribe to the correct SSE stream/:rentalId feed.
+
+rentalsRouter.get('/by-asset/:assetId', async (c) => {
+  const assetId = parseInt(c.req.param('assetId'), 10);
+  const rental = await rentalRepo.findByAssetId(assetId);
+  if (!rental) return c.json({ error: 'No rental found for this asset' }, 404);
+  return c.json({ rentalId: rental.rental_id, status: rental.status });
+});
 
 // ── Verify Ed25519 signature locally (mirrors contract's verify_rental_agreement) ─
 
@@ -115,18 +133,26 @@ rentalsRouter.post('/start', async (c) => {
     return c.json({ error: 'Rental agreement has expired' }, 400);
   }
 
-  // Try Ed25519 verification if available, else skip (demo mode)
-  if (body.signature && !body.signature.startsWith('mock_sig_')) {
-    const isValid = await verifyEd25519(payload, body.signature, body.renter);
-    if (!isValid) {
-      log(`[RentalsRouter] Invalid rental agreement signature from ${body.renter.slice(0, 10)}…`);
-      return c.json({ error: 'Invalid rental agreement signature' }, 401);
-    }
-  } else {
-    log(`[RentalsRouter] Demo mode — skipping signature verification`);
+  // Signature verification is always required — there is no bypass for a
+  // "mock_sig_"-prefixed value. A prior version of this route explicitly
+  // accepted that prefix without checking anything, which meant any caller
+  // could start a rental (and the streaming payments that follow from it)
+  // with zero proof the renter ever agreed to it.
+  const isValid = await verifyEd25519(payload, body.signature, body.renter);
+  if (!isValid) {
+    log(`[RentalsRouter] Invalid rental agreement signature from ${body.renter.slice(0, 10)}…`);
+    return c.json({ error: 'Invalid rental agreement signature' }, 401);
   }
 
   // ── 2. Create rental record ───────────────────────────────────────────────
+  // KNOWN LIMITATION: this does not yet submit a real on-chain
+  // RentalEscrow.start_rental() deploy — RentalEscrow was not deployed to
+  // testnet as of this pass (see scripts/deployment-results-v3.json once
+  // available), and encoding the RentalAgreement struct as Casper
+  // RuntimeArgs needs the deployed contract to validate against. The
+  // signature verification above is real and enforced; the on-chain
+  // recording of the rental start is the remaining gap, tracked for the
+  // next pass once RentalEscrow is live.
   const rentalId = Date.now() % 100_000;
 
   await rentalRepo.upsert({
@@ -170,26 +196,14 @@ rentalsRouter.post('/end', async (c) => {
   const body = await c.req.json<RentalEndBody>();
   const { rentalId, totalPaidMotes } = body;
 
-  // Update rental record
-  await (await import('../db/supabase')).supabase
-    .from('rentals')
-    .update({
-      status:      'Closed',
-      closed_at:   new Date().toISOString(),
-      total_streamed: totalPaidMotes,
-    })
-    .eq('rental_id', rentalId);
-
-  // Get the rental to find the asset
-  const { data: rental } = await (await import('../db/supabase')).supabase
-    .from('rentals')
-    .select('asset_id')
-    .eq('rental_id', rentalId)
-    .single();
+  // Routed through the repo layer (mock-mode-aware) instead of the raw
+  // supabase client, which is null when running in local-DB mode.
+  const rental = await rentalRepo.findByRentalId(rentalId);
+  await rentalRepo.close(rentalId, totalPaidMotes);
 
   if (rental) {
     // Set asset back to Idle
-    await assetRepo.updateStatus(rental.asset_id as number, 'Idle');
+    await assetRepo.updateStatus(rental.asset_id, 'Idle');
   }
 
   await logRepo.insert({
@@ -200,4 +214,56 @@ rentalsRouter.post('/end', async (c) => {
   });
 
   return c.json({ success: true, rentalId, closedAt: new Date().toISOString() });
+});
+
+// ── POST /api/v1/rentals/rate ─────────────────────────────────────────────────
+// Called by the Guardian Agent after it reviews a completed rental session.
+// Submits RentalEscrow.update_reputation(address, session_score) on-chain —
+// a real, signed, gas-paying deploy against the deployed RentalEscrow
+// contract, gated on the same env vars as the mint_asset call in assets.ts.
+
+interface RentalRateBody {
+  address:      string; // public key hex of the renter or owner being scored
+  sessionScore: number; // 0–100
+}
+
+rentalsRouter.post('/rate', async (c) => {
+  const body = await c.req.json<RentalRateBody>();
+
+  if (body.sessionScore < 0 || body.sessionScore > 100) {
+    return c.json({ error: 'sessionScore must be between 0 and 100' }, 400);
+  }
+
+  if (!RENTAL_ESCROW_ADDR || !AGENT_PRIVATE_KEY_PATH) {
+    return c.json({ error: 'RentalEscrow not configured (RENTAL_ESCROW_ADDR / AGENT_PRIVATE_KEY_PATH missing)' }, 500);
+  }
+
+  let txHash: string;
+  try {
+    txHash = await submitContractCall({
+      nodeUrl:             NODE_URL,
+      networkName:         NETWORK_NAME,
+      agentPrivateKeyPath: AGENT_PRIVATE_KEY_PATH,
+      contractHashHex:     RENTAL_ESCROW_ADDR,
+      entryPoint:          'update_reputation',
+      args: {
+        address:       CLValueBuilder.key(CLPublicKey.fromHex(body.address)),
+        session_score: CLValueBuilder.u8(body.sessionScore),
+      },
+    });
+    await waitForDeploy(NODE_URL, txHash);
+  } catch (err) {
+    console.error('[RentalsRouter] update_reputation deploy failed:', String(err));
+    return c.json({ error: 'On-chain reputation update failed', detail: String(err) }, 502);
+  }
+
+  await logRepo.insert({
+    agent_name:       'GuardianAgent',
+    action_performed: 'update_reputation',
+    payload:          { ...body },
+    status:           'success',
+    tx_hash:          txHash,
+  });
+
+  return c.json({ success: true, txHash, explorerUrl: `https://testnet.cspr.live/deploy/${txHash}` });
 });
