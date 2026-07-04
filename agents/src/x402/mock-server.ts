@@ -1,19 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  x402 Mock Oracle Server
-//  Simulates a pricing API endpoint that demands x402 micropayments.
-//  Used for local development and E2E integration tests.
+//  x402 Pricing Oracle — LOCAL DEV FIXTURE
+//
+//  This is a local-dev-only pricing endpoint (the equipment price database
+//  below is a documented static fixture — no live global equipment-pricing
+//  API exists to wire up here). What is NOT a fixture is payment verification:
+//  this now calls the real facilitator (verifyPayment), which does genuine
+//  Ed25519/Secp256K1 signature checking and on-chain RPC confirmation — the
+//  same real check used everywhere else, not a hardcoded `true`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import express, { Request, Response } from 'express';
-import { X402Client } from './client';
+import { verifyPayment } from './facilitator';
 
 const app  = express();
 const PORT = parseInt(process.env['ORACLE_PORT'] ?? '4402', 10);
-
-// Create a verification client (mocked for development)
-const verifierClient = {
-  verifyPaymentHeader: (_header: string) => true
-};
+const NODE_URL = process.env['CASPER_NODE_URL'] ?? 'https://node.testnet.casper.network/rpc';
+const NETWORK  = process.env['CASPER_NETWORK'] ?? 'casper-test';
 
 const PAYMENT_AMOUNT  = process.env['ORACLE_PAYMENT_AMOUNT'] ?? '500000'; // 0.0005 CSPR
 const ORACLE_ADDRESS  = process.env['ORACLE_WALLET_ADDRESS'] ?? 'mock-oracle-address';
@@ -36,7 +38,7 @@ app.use(express.json());
 
 // ── Pricing Endpoint (requires x402 payment) ─────────────────────────────────
 
-app.get('/v1/price', (req: Request, res: Response) => {
+app.get('/v1/price', async (req: Request, res: Response) => {
   const xPayment = req.headers['x-payment'] as string | undefined;
 
   // Step 1 — No payment header → return 402 challenge
@@ -46,7 +48,7 @@ app.get('/v1/price', (req: Request, res: Response) => {
        .set({
          'X-Payment-Address': ORACLE_ADDRESS,
          'X-Payment-Amount':  PAYMENT_AMOUNT,
-         'X-Payment-Network': 'casper-testnet',
+         'X-Payment-Network': NETWORK,
          'X-Payment-Nonce':   Date.now().toString(),
          'Content-Type':      'application/json',
        })
@@ -54,11 +56,16 @@ app.get('/v1/price', (req: Request, res: Response) => {
     return;
   }
 
-  // Step 2 — Verify payment signature
-  const isValid = verifierClient.verifyPaymentHeader(xPayment);
-  if (!isValid) {
-    console.log(`[Oracle] Invalid payment signature rejected`);
-    res.status(403).json({ error: 'Invalid payment signature' });
+  // Step 2 — Verify payment: real signature check + real on-chain RPC
+  // confirmation that a matching transfer actually landed. Not a stub.
+  const verification = await verifyPayment(
+    xPayment,
+    { recipient: ORACLE_ADDRESS, amountMotes: BigInt(PAYMENT_AMOUNT), network: NETWORK },
+    NODE_URL,
+  );
+  if (!verification.ok) {
+    console.log(`[Oracle] Payment rejected: ${verification.reason}`);
+    res.status(403).json({ error: 'Invalid payment signature', reason: verification.reason });
     return;
   }
 

@@ -8,7 +8,7 @@ import cron from 'node-cron';
 import { EventEmitter } from 'eventemitter3';
 import { X402Client } from './client';
 import { CasperMCPClient } from '../mcp/casper-mcp-client';
-import { PaymentSplit, RentalData, StreamPayload } from '../types';
+import { PaymentSplit, RentalData } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Split constants (basis points, must sum to 10000)
@@ -98,67 +98,32 @@ export class X402StreamEngine extends EventEmitter {
     }
   }
 
+  /**
+   * Computes the 3-way split and emits `stream_payment` for CollectorAgent
+   * to actually execute. This deliberately does NOT sign an x402 proof or
+   * POST to the backend here — at this point no real transfer has happened
+   * yet, so there is no deployHash to attest to. CollectorAgent performs
+   * the real on-chain transfers first (onPaymentProcessed), then reports
+   * the confirmed result to the backend itself with a genuine payment proof
+   * bound to the real deploy hash.
+   */
   private async processSession(rentalId: number, session: ActiveSession): Promise<void> {
     const { rental, ownerAddress, loanActive } = session;
     const amountMotes = rental.ratePerMinute; // motes per minute
 
-    // ── Compute 3-way split ─────────────────────────────────────────────────
     const split = this.computeSplit(amountMotes);
     this.log(
       `Session #${rentalId}: ${amountMotes} motes → ` +
       `owner:${split.ownerMotes} loan:${split.loanRepayMotes} fee:${split.protocolFeeMotes}`
     );
 
-    // ── Build payment proof via x402 ───────────────────────────────────────
-    const paymentProof = this.config.x402Client.signPaymentProof({
-      recipient: ownerAddress,
-      amount:    amountMotes.toString(),
-      network:   'casper-testnet',
-      nonce:     uuidv4(),
+    this.emit('stream_payment', {
+      eventType: 'STREAM_PAYMENT' as const,
+      source:    'CollectorAgent',
+      timestamp: Date.now(),
+      payload:   { rentalId, assetId: rental.assetId, ownerAddress, loanActive, split },
+      traceId:   uuidv4(),
     });
-
-    const payload: StreamPayload = {
-      rentalId,
-      assetId:      rental.assetId,
-      amountMotes,
-      paymentProof,
-      timestamp:    Date.now(),
-    };
-
-    // ── Submit to API gateway ──────────────────────────────────────────────
-    try {
-      const response = await fetch(`${this.config.backendUrl}/api/v1/stream/payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...payload,
-          amountMotes:       amountMotes.toString(),
-          split: {
-            ownerMotes:       split.ownerMotes.toString(),
-            loanRepayMotes:   split.loanRepayMotes.toString(),
-            protocolFeeMotes: split.protocolFeeMotes.toString(),
-          },
-          loanActive,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Gateway returned ${response.status}`);
-      }
-
-      this.log(`Session #${rentalId} — payment processed successfully`);
-
-      this.emit('stream_payment', {
-        eventType: 'STREAM_PAYMENT' as const,
-        source:    'CollectorAgent',
-        timestamp: Date.now(),
-        payload:   { rentalId, split },
-        traceId:   uuidv4(),
-      });
-    } catch (err) {
-      this.log(`Gateway submission failed: ${String(err)}`);
-      // Re-queue for next tick — no payment dropped
-    }
   }
 
   // ── Split Math ──────────────────────────────────────────────────────────────

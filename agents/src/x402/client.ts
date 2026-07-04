@@ -1,108 +1,170 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  x402 Client — Official @casper/x402 Implementation
-//  Uses the official Casper SDK to automatically handle 402 Payment Required.
+//  x402 Client — Real Casper Implementation
+//
+//  There is no published `@casper/x402` npm package — the PRD's reference to
+//  it doesn't resolve to anything installable. This is a from-scratch,
+//  spec-compatible implementation of the HTTP 402 challenge/response flow:
+//  every payment here is a genuine signed CSPR transfer submitted to the
+//  Casper testnet RPC node and confirmed on-chain before the request retries.
+//  A failed signature throws; it never fabricates a "mock-signature-*" value.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { X402Client as OfficialX402Client } from '@casper/x402';
 import { Keys } from 'casper-js-sdk';
+import { loadAgentKey } from '../lib/casper-key';
+import { submitTransfer, waitForDeploy, parsePublicKeyOrThrow } from '../lib/casper-rpc';
 
 export interface X402ClientConfig {
-  network:          string;
-  privateKeyPem?:   string;
-  maxPaymentMotes:  bigint;
+  network:            string;
+  nodeUrl:            string;
+  agentPrivateKeyPath: string;
+  maxPaymentMotes:    bigint;
+}
+
+export interface PaymentProof {
+  network:    string;
+  recipient:  string;
+  amount:     string;
+  nonce:      string;
+  deployHash: string;
+  signature:  string;
+  publicKey:  string;
+  timestamp:  number;
 }
 
 export class X402Client {
-  private readonly client: OfficialX402Client;
+  private readonly keyPair:    Keys.AsymmetricKey;
+  private readonly nodeUrl:    string;
+  private readonly network:    string;
   private readonly maxPayment: bigint;
-  private readonly keyPair: any;
 
   constructor(config: X402ClientConfig) {
+    this.nodeUrl    = config.nodeUrl;
+    this.network    = config.network;
     this.maxPayment = config.maxPaymentMotes;
-
-    let keyPair: any;
-    if (config.privateKeyPem) {
-      keyPair = Keys.Ed25519.parsePrivateKey(Keys.Ed25519.readBase64WithPEM(config.privateKeyPem));
-    } else {
-      keyPair = Keys.Ed25519.new();
-    }
-    this.keyPair = keyPair;
-
-    this.client = new OfficialX402Client({
-      network: config.network,
-      keyPair: keyPair,
-      maxAutoPayMotes: config.maxPaymentMotes.toString(),
-    });
+    // Throws immediately on a missing/invalid key — no silent throwaway-key fallback.
+    this.keyPair = loadAgentKey(config.agentPrivateKeyPath);
   }
 
   /**
-   * Cryptographically sign an x402 payment proof.
+   * Signs an x402 payment proof over the fields the facilitator will check.
+   *
+   * Two call shapes:
+   *  - Agent-to-oracle payments (fetch() below) always pass a real
+   *    `deployHash` from an already-submitted, already-confirmed transfer —
+   *    the facilitator's verifyPayment() requires this to be non-empty and
+   *    on-chain-confirmed before it accepts the proof.
+   *  - Streaming split announcements (stream-engine.ts) sign BEFORE any
+   *    transfer exists — the actual CSPR movement for each slice happens
+   *    afterward via collector-agent.ts's dispatchTransfer. For this case
+   *    `deployHash` is omitted; the resulting proof is an attestation of the
+   *    intended split, not a redeemable x402 payment proof, and must not be
+   *    passed to verifyPayment().
+   *
+   * Throws if signing fails; never returns a fabricated signature.
    */
   signPaymentProof(params: {
-    recipient: string;
-    amount:    string;
-    network:   string;
-    nonce:     string;
-  }) {
+    recipient:  string;
+    amount:     string;
+    network:    string;
+    nonce:      string;
+    deployHash?: string;
+  }): PaymentProof {
     const timestamp = Date.now();
-    const message = `${params.network}:${params.recipient}:${params.amount}:${params.nonce}:${timestamp}`;
-    
-    let signature = '';
-    let publicKey = '';
-    try {
-      const msgBytes = Buffer.from(message);
-      const sigBytes = this.keyPair.sign(msgBytes);
-      signature = Buffer.from(sigBytes).toString('hex');
-      publicKey = this.keyPair.publicKey.toHex();
-    } catch {
-      signature = 'mock-signature-' + params.nonce;
-      publicKey = 'mock-public-key';
-    }
+    const deployHash = params.deployHash ?? '';
+    const message = `${params.network}:${params.recipient}:${params.amount}:${params.nonce}:${deployHash}`;
+    const sigBytes = this.keyPair.sign(Buffer.from(message));
 
     return {
-      network:   params.network,
-      recipient: params.recipient,
-      amount:    params.amount,
-      signature,
-      publicKey,
+      network:    params.network,
+      recipient:  params.recipient,
+      amount:     params.amount,
+      nonce:      params.nonce,
+      deployHash,
+      signature:  Buffer.from(sigBytes).toString('hex'),
+      publicKey:  this.keyPair.publicKey.toHex(),
       timestamp,
     };
   }
 
   /**
-   * Fetch a URL, automatically handling 402 Payment Required by:
-   * 1. The official SDK reading X-Payment-Address and X-Payment-Amount.
-   * 2. Signing the payment proof with the agent's key.
-   * 3. Retrying the request with X-Payment headers attached.
+   * Fetches a URL, handling HTTP 402 Payment Required by hand:
+   *   1. Initial request.
+   *   2. On 402, read X-Payment-Address / X-Payment-Amount / X-Payment-Network
+   *      / X-Payment-Nonce headers (the contract mock-server.ts already
+   *      emits — the de facto spec here, since no real "@casper/x402" exists).
+   *   3. Submit a real signed CSPR transfer for that exact amount, to that
+   *      exact recipient, on the specified network.
+   *   4. Wait for on-chain confirmation.
+   *   5. Attach a signed X-Payment proof referencing the confirmed deploy
+   *      hash and retry the original request once.
    */
   async fetch<T>(url: string, options: {
     method?:  string;
     params?:  Record<string, string | number>;
     body?:    unknown;
     headers?: Record<string, string>;
-  }): Promise<T> {
+  } = {}): Promise<T> {
     const fullUrl = this.buildUrl(url, options.params);
-    const requestInit: RequestInit = {
+    const baseInit: RequestInit = {
       method:  options.method ?? 'GET',
       headers: { 'Content-Type': 'application/json', ...options.headers },
       ...(options.body ? { body: JSON.stringify(options.body) } : {}),
     };
 
-    try {
-      // The official SDK fetch interceptor handles the 402 challenge flow
-      const response = await this.client.fetch(fullUrl, requestInit);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-      }
+    const initialResponse = await fetch(fullUrl, baseInit);
 
-      return response.json() as Promise<T>;
-    } catch (err: any) {
-      if (err.message?.includes('exceeds maxAutoPayMotes')) {
-        console.error(`[X402Client] Payment blocked: ${err.message}`);
+    if (initialResponse.status !== 402) {
+      if (!initialResponse.ok) {
+        throw new Error(`HTTP ${initialResponse.status}: ${await initialResponse.text()}`);
       }
-      throw err;
+      return initialResponse.json() as Promise<T>;
     }
+
+    // ── 402 challenge received — pay for real ──────────────────────────────
+    const recipient = initialResponse.headers.get('X-Payment-Address');
+    const amountStr = initialResponse.headers.get('X-Payment-Amount');
+    const network   = initialResponse.headers.get('X-Payment-Network') ?? this.network;
+    const nonce     = initialResponse.headers.get('X-Payment-Nonce') ?? Date.now().toString();
+
+    if (!recipient || !amountStr) {
+      throw new Error(`402 response from ${fullUrl} is missing X-Payment-Address/X-Payment-Amount headers`);
+    }
+
+    const amountMotes = BigInt(amountStr);
+    if (amountMotes > this.maxPayment) {
+      throw new Error(
+        `x402 payment of ${amountMotes} motes exceeds configured ceiling of ${this.maxPayment} motes for ${fullUrl}`
+      );
+    }
+
+    // Validate the recipient is a real public key up front — fail loudly
+    // rather than let a malformed challenge silently misdirect funds.
+    parsePublicKeyOrThrow(recipient, `x402 payment to ${fullUrl}`);
+
+    const deployHash = await submitTransfer({
+      nodeUrl:            this.nodeUrl,
+      networkName:        network,
+      sender:             this.keyPair,
+      targetPublicKeyHex: recipient,
+      amountMotes,
+      context:            `x402 payment to ${fullUrl}`,
+    });
+
+    await waitForDeploy(this.nodeUrl, deployHash);
+
+    const proof = this.signPaymentProof({ recipient, amount: amountStr, network, nonce, deployHash });
+    const xPaymentHeader = Buffer.from(JSON.stringify(proof)).toString('base64');
+
+    const paidResponse = await fetch(fullUrl, {
+      ...baseInit,
+      headers: { ...baseInit.headers, 'X-Payment': xPaymentHeader },
+    });
+
+    if (!paidResponse.ok) {
+      throw new Error(`HTTP ${paidResponse.status} after paying x402 challenge: ${await paidResponse.text()}`);
+    }
+
+    return paidResponse.json() as Promise<T>;
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -117,9 +179,10 @@ export class X402Client {
 }
 
 export function createX402ClientFromEnv(): X402Client {
-  const privateKeyPem   = process.env['AGENT_PRIVATE_KEY']; // PEM formatted
-  const network         = process.env['CASPER_NETWORK'] ?? 'casper-testnet';
-  const maxPaymentMotes = BigInt(process.env['X402_MAX_PAYMENT_MOTES'] ?? '1000000');
+  const agentPrivateKeyPath = process.env['AGENT_PRIVATE_KEY_PATH'] ?? '';
+  const network             = process.env['CASPER_NETWORK'] ?? 'casper-test';
+  const nodeUrl             = process.env['CASPER_NODE_URL'] ?? 'https://node.testnet.casper.network/rpc';
+  const maxPaymentMotes     = BigInt(process.env['X402_MAX_PAYMENT_MOTES'] ?? '1000000');
 
-  return new X402Client({ privateKeyPem, network, maxPaymentMotes });
+  return new X402Client({ agentPrivateKeyPath, network, nodeUrl, maxPaymentMotes });
 }
