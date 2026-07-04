@@ -129,6 +129,27 @@ export class GuardianAgent extends EventEmitter {
       } catch (err) {
         this.log(`CUC issuance failed: ${String(err)}`);
       }
+
+      // ── Score the renter's session reputation on-chain ────────────────────
+      // Heuristic (not specified further by the PRD): a session that leaves
+      // the asset's condition unchanged or improved scores 100; each point
+      // of degradation beyond the normal ±5 noise band costs 4 reputation
+      // points, floored at 0.
+      const degradation = Math.max(0, -scoreDelta - 5);
+      const sessionScore = Math.max(0, 100 - degradation * 4);
+      try {
+        const repRes = await fetch(`${this.config.backendUrl}/api/v1/rentals/rate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ address: rentalClose.renterAddress, sessionScore }),
+        });
+        if (repRes.ok) {
+          const d = await repRes.json() as { txHash: string };
+          this.log(`Renter reputation scored ${sessionScore}/100 (tx ${d.txHash})`);
+        }
+      } catch (err) {
+        this.log(`Reputation update failed: ${String(err)}`);
+      }
     }
 
     const result: ConditionCheckResult = {
@@ -159,13 +180,36 @@ export class GuardianAgent extends EventEmitter {
       if (!res.ok) return;
       const assets = await res.json() as AssetMetadata[];
       this.log(`Running guardian check for ${assets.length} active asset(s)`);
-      // In production each asset owner receives a push notification; here we
-      // generate a placeholder photo for the check.
       for (const asset of assets) {
-        await this.checkAsset(asset, 'placeholder_base64');
+        const photoB64 = await this.fetchStoredPhoto(asset);
+        if (!photoB64) {
+          this.log(`Skipping scheduled vision recheck for asset #${asset.assetId} — no photo available since last capture`);
+          continue;
+        }
+        await this.checkAsset(asset, photoB64);
       }
     } catch (err) {
       this.log(`Guardian batch check error: ${String(err)}`);
+    }
+  }
+
+  /**
+   * Fetches the asset's most recently stored photo (by IPFS hash) and
+   * returns it as a base64 string for re-analysis. Returns null — never a
+   * placeholder — if no real photo can be retrieved, so callers can honestly
+   * skip that asset's scheduled check instead of pretend-analyzing nothing.
+   */
+  private async fetchStoredPhoto(asset: AssetMetadata): Promise<string | null> {
+    if (!asset.ipfsPhotoHash) return null;
+    try {
+      const gatewayUrl = `https://ipfs.io/ipfs/${asset.ipfsPhotoHash}`;
+      const res = await fetch(gatewayUrl);
+      if (!res.ok) return null;
+      const buf = Buffer.from(await res.arrayBuffer());
+      return buf.toString('base64');
+    } catch (err) {
+      this.log(`Could not fetch stored photo for asset #${asset.assetId}: ${String(err)}`);
+      return null;
     }
   }
 

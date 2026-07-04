@@ -56,6 +56,8 @@ export class OrchestratorAgent extends EventEmitter {
       moondreamApiUrl:  MOONDREAM_URL,
       pricingOracleUrl: ORACLE_URL,
       x402Client,
+      anthropicApiKey:  process.env['ANTHROPIC_API_KEY'],
+      ipfsApiKey:       process.env['IPFS_API_KEY'],
     });
 
     this.risk = new RiskAgent({ casperMCP, csprTradeMCP });
@@ -90,7 +92,7 @@ export class OrchestratorAgent extends EventEmitter {
       carbonCreditAddr: process.env['CARBON_CREDIT_ADDR'] ?? '0'.repeat(64),
       networkName:     process.env['CASPER_NETWORK'] ?? 'casper-test',
       nodeUrl:         process.env['CASPER_NODE_URL'] ?? 'https://node.testnet.casper.network/rpc',
-      agentPrivateKey: process.env['AGENT_PRIVATE_KEY'] ?? '',
+      agentPrivateKey: process.env['AGENT_PRIVATE_KEY_PATH'] ?? '',
     });
 
     this.maintenanceOracle = new MaintenanceOracleAgent({

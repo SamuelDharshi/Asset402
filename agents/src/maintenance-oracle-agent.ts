@@ -8,6 +8,25 @@ import { EventEmitter } from 'eventemitter3';
 import { X402Client }   from './x402/client';
 import { AgentMessage, AssetMetadata } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import { Keys } from 'casper-js-sdk';
+import { loadAgentKey } from './lib/casper-key';
+import { submitTransfer, waitForDeploy } from './lib/casper-rpc';
+
+// No live global equipment-service-provider marketplace API exists to wire up
+// (documented limitation, see PRD honesty callouts) — this is a curated seed
+// directory, not a stand-in for a real API. Every entry is labeled
+// `source: 'curated-directory'` so callers can distinguish it from a
+// hypothetical future live API response (`source: 'live-api'`).
+const KNOWN_SERVICE_PROVIDERS: Record<string, { name: string; rating: number; estimatedCostUsd: number }> = {
+  'default':        { name: 'Sigma Field Services',   rating: 4.8, estimatedCostUsd: 210 },
+  'Excavator':      { name: 'Sigma Heavy Equipment',  rating: 4.7, estimatedCostUsd: 340 },
+  'Cinema Camera':  { name: 'Sigma Cine Services',     rating: 4.8, estimatedCostUsd: 210 },
+  'Generator':      { name: 'Sigma Power Services',    rating: 4.6, estimatedCostUsd: 180 },
+};
+
+// Documented fallback CSPR/USD rate, used only when no live rate is supplied
+// to executeBooking() — same honesty pattern as risk-agent.ts's fallback price.
+const FALLBACK_CSPR_USD_RATE = 0.0234;
 
 // ── Manufacturer service intervals (hours) by asset category ─────────────────
 const SERVICE_INTERVAL_HOURS: Record<string, number> = {
@@ -56,6 +75,9 @@ export interface MaintenancePrediction {
     estimatedCostUsd: number;
     availableDate:    string;
     bookingUrl:       string;
+    /** 'live-api' if a real service-finder endpoint answered, 'curated-directory'
+     *  if this came from the static KNOWN_SERVICE_PROVIDERS fixture. */
+    source:           'live-api' | 'curated-directory';
   } | null;
   status: 'OK' | 'DUE_SOON' | 'OVERDUE';
 }
@@ -67,16 +89,29 @@ export interface MaintenanceOracleConfig {
   serviceFinder: string;
   /** Warning threshold: alert when within this many hours of service */
   alertThresholdH: number;
+  /** Path to the agent's Casper secret-key PEM, for signing real deposit transfers. */
+  agentPrivateKeyPath?: string;
+  nodeUrl?:     string;
+  networkName?: string;
+  /** Real Casper account (public-key hex) that receives service deposits —
+   *  no real external provider account exists, so this documented
+   *  placeholder ("service escrow") is the actual on-chain destination.
+   *  The money movement is real even though the provider match is a fixture. */
+  serviceEscrowAddress?: string;
 }
 
 export class MaintenanceOracleAgent extends EventEmitter {
   private readonly config: MaintenanceOracleConfig;
   /** In-memory map of assetId → total hours operated */
   private operatingHours = new Map<number, number>();
+  private agentKey: Keys.AsymmetricKey | null = null;
 
   constructor(config: MaintenanceOracleConfig) {
     super();
     this.config = config;
+    if (config.agentPrivateKeyPath) {
+      this.agentKey = loadAgentKey(config.agentPrivateKeyPath);
+    }
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -137,31 +172,45 @@ export class MaintenanceOracleAgent extends EventEmitter {
 
   /**
    * Execute an approved maintenance booking.
-   * Pays service deposit via x402 and records the maintenance on-chain.
+   *
+   * There is no real external service-provider payment API to call — the
+   * deposit is instead a REAL signed CSPR transfer to the documented
+   * service-escrow account (`config.serviceEscrowAddress`). The money
+   * movement and on-chain proof are genuine; only the "provider" side is a
+   * curated fixture (see KNOWN_SERVICE_PROVIDERS above).
    */
   async executeBooking(
     assetId:     number,
     bookingUrl:  string,
     depositUsd:  number,
+    csprUsdRate: number = FALLBACK_CSPR_USD_RATE,
   ): Promise<{ bookingRef: string; depositTxHash: string }> {
     this.log(`Booking maintenance for asset #${assetId} — deposit $${depositUsd}`);
+    void bookingUrl; // retained in the signature for callers/tests; no live booking endpoint to call
 
-    // Pay deposit via x402 (returns booking confirmation)
-    let bookingRef = '';
-    let depositTxHash = '';
+    if (!this.agentKey || !this.config.nodeUrl || !this.config.networkName || !this.config.serviceEscrowAddress) {
+      throw new Error(
+        'executeBooking requires agentPrivateKeyPath, nodeUrl, networkName, and serviceEscrowAddress ' +
+        'to be configured — a real deposit transfer cannot be signed without them.'
+      );
+    }
+
+    const depositMotes = BigInt(Math.round((depositUsd / csprUsdRate) * 1_000_000_000));
+    const bookingRef = uuidv4();
+    let depositTxHash: string;
     try {
-      interface BookingResp { bookingRef: string; txHash: string }
-      const data = await this.config.x402Client.fetch<BookingResp>(bookingUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId, depositUsd }),
+      depositTxHash = await submitTransfer({
+        nodeUrl:            this.config.nodeUrl,
+        networkName:        this.config.networkName,
+        sender:             this.agentKey,
+        targetPublicKeyHex: this.config.serviceEscrowAddress,
+        amountMotes:        depositMotes,
+        context:            `maintenance deposit for asset #${assetId}`,
       });
-      bookingRef    = data.bookingRef;
-      depositTxHash = data.txHash;
+      await waitForDeploy(this.config.nodeUrl, depositTxHash);
     } catch (err) {
-      this.log(`Booking payment failed: ${String(err)}`);
-      bookingRef    = `mock-booking-${assetId}-${Date.now()}`;
-      depositTxHash = `mock-tx-${uuidv4().replace(/-/g, '')}`;
+      this.log(`Deposit transfer failed for asset #${assetId}: ${String(err)}`);
+      throw err; // booking must not be reported "Confirmed" on a failed payment
     }
 
     // Record maintenance on-chain via backend
@@ -222,15 +271,19 @@ export class MaintenanceOracleAgent extends EventEmitter {
         estimatedCostUsd: data.cost_usd,
         availableDate:    data.available_date,
         bookingUrl:       data.booking_url,
+        source:           'live-api',
       };
     } catch {
-      // Return a realistic demo provider when API is unavailable
+      // No live service-finder API exists to call — this is the
+      // documented curated-directory fallback, clearly labeled as such.
+      const provider = KNOWN_SERVICE_PROVIDERS[asset.assetType] ?? KNOWN_SERVICE_PROVIDERS['default']!;
       return {
-        name:             'Sigma Field Services',
-        rating:           4.8,
-        estimatedCostUsd: 210,
+        name:             provider.name,
+        rating:           provider.rating,
+        estimatedCostUsd: provider.estimatedCostUsd,
         availableDate:    new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString().slice(0, 10),
         bookingUrl:       `${this.config.serviceFinder}/book`,
+        source:           'curated-directory',
       };
     }
   }

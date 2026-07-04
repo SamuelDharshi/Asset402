@@ -8,9 +8,11 @@
     "dev": "ts-node-dev --respawn --transpile-only src/orchestrator.ts",
     "start": "node dist/orchestrator.js",
     "test": "jest --passWithNoTests",
-    "mock-oracle": "ts-node src/x402/mock-server.ts"
+    "mock-oracle": "ts-node src/x402/mock-server.ts",
+    "api-server": "ts-node src/api-server.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@langchain/core": "^0.3.0",
     "@langchain/openai": "^0.3.0",
     "axios": "^1.7.2",

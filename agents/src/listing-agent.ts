@@ -38,7 +38,10 @@ export interface SurgeSignal {
   validUntil:      Date;
 }
 
-// Hard-coded seasonal surge calendar (supplemented by x402 API in production)
+// SEASONAL_SURGES — curated static calendar, NOT a live demand-surge market
+// feed. No such feed exists to wire up here (documented limitation) — the
+// live x402-paid API path above is tried first and used whenever
+// `surgeApiUrl` actually answers; this calendar is the honest fallback.
 const SEASONAL_SURGES: SurgeSignal[] = [
   {
     assetType:       'Agricultural Tractor',

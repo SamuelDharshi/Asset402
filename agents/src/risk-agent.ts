@@ -45,12 +45,14 @@ export class RiskAgent extends EventEmitter {
 
     // ── Step 1: On-chain history via Casper MCP ────────────────────────────
     let history;
+    let usedFallbackData = false;
     try {
       history = await this.casper.getAccountHistory(ownerPublicKey);
       this.log(`Account history: ${history.deployCount} deploys, age ${history.accountAge} days`);
     } catch (err) {
       console.warn(`[RiskAgent] Casper MCP unavailable — using fallback account data: ${String(err)}`);
       history = { accountAge: 365, deployCount: 10, transferCount: 5 }; // Safe defaults
+      usedFallbackData = true;
     }
 
     // ── Step 2: CSPR price from CSPR.trade MCP ────────────────────────────
@@ -61,6 +63,7 @@ export class RiskAgent extends EventEmitter {
     } catch (err) {
       console.warn(`[RiskAgent] CSPR.trade MCP unavailable — using fallback price: ${String(err)}`);
       priceData = { priceUsd: 0.0234, change24h: 0, symbol: 'CSPR' }; // Last known fallback
+      usedFallbackData = true;
     }
 
     // ── Step 3: Decision Matrix ────────────────────────────────────────────
@@ -73,7 +76,8 @@ export class RiskAgent extends EventEmitter {
 
     this.log(
       `Max loan: ${maxLoanCspr.toFixed(2)} CSPR ($${maxLoanUsd.toFixed(2)}), ` +
-      `risk score: ${riskScore}/100, recommendation: ${recommendation}`
+      `risk score: ${riskScore}/100, recommendation: ${recommendation}` +
+      (usedFallbackData ? ' [USING FALLBACK DATA — verify before large loans]' : '')
     );
 
     const assessment: RiskAssessment = {
@@ -86,6 +90,7 @@ export class RiskAgent extends EventEmitter {
       riskScore,
       liquidationLtvBps: LIQ_LTV_BPS,
       recommendation,
+      usedFallbackData,
     };
 
     this.emit('risk_assessed', {
@@ -114,7 +119,7 @@ export class RiskAgent extends EventEmitter {
    * Lower risk score = safer to lend.
    */
   private computeRiskScore(
-    history:     { accountAge: number; deployCount: number },
+    history:     { accountAge: number; deployCount: number; transferCount?: number },
     vision:      VisionAnalysisResult,
     change24h:   number,
   ): number {

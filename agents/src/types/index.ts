@@ -52,6 +52,10 @@ export interface RiskAssessment {
   riskScore:      number; // 0–100, lower = safer
   liquidationLtvBps: number;
   recommendation: 'APPROVE' | 'REJECT' | 'MANUAL_REVIEW';
+  /** True if account history and/or CSPR price came from a fallback default
+   *  because the corresponding MCP call failed — callers should surface this
+   *  rather than treat the assessment as identical to one backed by live data. */
+  usedFallbackData: boolean;
 }
 
 // ── Loan ──────────────────────────────────────────────────────────────────────
