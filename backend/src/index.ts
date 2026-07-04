@@ -16,6 +16,9 @@ import { pricingRouter }    from './routes/pricing';
 import { carbonRouter }     from './routes/carbon';
 import { rentalsRouter }    from './routes/rentals';
 import { maintenanceRouter } from './routes/maintenance';
+import { ownerRouter }       from './routes/owner';
+import { lendingRouter }     from './routes/lending';
+import { visionRouter }      from './routes/vision';
 import { CsprCloudSSEListener } from './hooks/cspr-cloud-sse';
 import { logRepo } from './db/supabase';
 
@@ -40,6 +43,9 @@ app.route('/api/v1/pricing',     pricingRouter);
 app.route('/api/v1/carbon',      carbonRouter);
 app.route('/api/v1/rentals',     rentalsRouter);
 app.route('/api/v1/maintenance', maintenanceRouter);
+app.route('/api/v1/owner',       ownerRouter);
+app.route('/api/v1/lending',     lendingRouter);
+app.route('/api/v1/vision',      visionRouter);
 
 // ── Health ────────────────────────────────────────────────────────────────────
 

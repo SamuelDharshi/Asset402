@@ -171,10 +171,13 @@ export const assetRepo = {
           asset_type: data.asset_type ?? '',
           make: data.make,
           model_est: data.model_est,
+          year_range: data.year_range,
           valuation_usd: data.valuation_usd ?? 0,
           condition_score: data.condition_score ?? 100,
           ipfs_photo_hash: data.ipfs_photo_hash,
           status: data.status ?? 'Idle',
+          ltv_ratio: data.ltv_ratio,
+          mint_tx_hash: data.mint_tx_hash,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -243,6 +246,57 @@ export const assetRepo = {
     if (error) throw error;
     return data as AssetRow[];
   },
+
+  /**
+   * Next sequential application-level asset ID. This is the backend's own
+   * indexing sequence, not a decode of the on-chain AssetId assigned inside
+   * the mint_asset deploy's emitted CES event (decoding that from raw
+   * deploy effects is a documented scope boundary — see onboard route
+   * comment). Under this demo's single-backend-instance assumption it
+   * tracks the contract's own incrementing counter 1:1.
+   */
+  async nextAssetId(): Promise<number> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.assets.reduce((max, a) => Math.max(max, a.asset_id), 0) + 1;
+    }
+
+    const { data, error } = await supabase
+      .from('assets')
+      .select('asset_id')
+      .order('asset_id', { ascending: false })
+      .limit(1);
+    if (error) throw error;
+    return ((data?.[0]?.asset_id as number | undefined) ?? 0) + 1;
+  },
+
+  async findByOwner(ownerAddress: string) {
+    if (isMockDb) {
+      const db = readDb();
+      return db.assets.filter(a => a.owner_address === ownerAddress);
+    }
+
+    const { data, error } = await supabase
+      .from('assets')
+      .select('*')
+      .eq('owner_address', ownerAddress);
+    if (error) throw error;
+    return data as AssetRow[];
+  },
+
+  async findByStatuses(statuses: AssetRow['status'][]) {
+    if (isMockDb) {
+      const db = readDb();
+      return db.assets.filter(a => statuses.includes(a.status));
+    }
+
+    const { data, error } = await supabase
+      .from('assets')
+      .select('*')
+      .in('status', statuses);
+    if (error) throw error;
+    return data as AssetRow[];
+  },
 };
 
 export const loanRepo = {
@@ -276,6 +330,21 @@ export const loanRepo = {
       .single();
     if (error) throw error;
     return row as LoanRow;
+  },
+
+  async findByAssetId(assetId: number): Promise<LoanRow | null> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.loans.find(l => l.asset_id === assetId) ?? null;
+    }
+
+    const { data, error } = await supabase
+      .from('loans')
+      .select('*')
+      .eq('asset_id', assetId)
+      .maybeSingle();
+    if (error) throw error;
+    return data as LoanRow | null;
   },
 
   async updateRemaining(assetId: number, remainingMotes: string, status?: LoanRow['status']) {
@@ -340,6 +409,38 @@ export const rentalRepo = {
     return row as RentalRow;
   },
 
+  async findByAssetId(assetId: number): Promise<RentalRow | null> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.rentals.find(r => r.asset_id === assetId) ?? null;
+    }
+
+    const { data, error } = await supabase
+      .from('rentals')
+      .select('*')
+      .eq('asset_id', assetId)
+      .order('started_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data as RentalRow | null;
+  },
+
+  async findByRentalId(rentalId: number): Promise<RentalRow | null> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.rentals.find(r => r.rental_id === rentalId) ?? null;
+    }
+
+    const { data, error } = await supabase
+      .from('rentals')
+      .select('*')
+      .eq('rental_id', rentalId)
+      .maybeSingle();
+    if (error) throw error;
+    return data as RentalRow | null;
+  },
+
   async updateStreamed(rentalId: number, totalStreamed: string) {
     if (isMockDb) {
       const db = readDb();
@@ -354,6 +455,26 @@ export const rentalRepo = {
     const { error } = await supabase
       .from('rentals')
       .update({ total_streamed: totalStreamed })
+      .eq('rental_id', rentalId);
+    if (error) throw error;
+  },
+
+  async close(rentalId: number, totalStreamed: string) {
+    if (isMockDb) {
+      const db = readDb();
+      const existing = db.rentals.find(r => r.rental_id === rentalId);
+      if (existing) {
+        existing.status = 'Closed';
+        existing.closed_at = new Date().toISOString();
+        existing.total_streamed = totalStreamed;
+        writeDb(db);
+      }
+      return;
+    }
+
+    const { error } = await supabase
+      .from('rentals')
+      .update({ status: 'Closed', closed_at: new Date().toISOString(), total_streamed: totalStreamed })
       .eq('rental_id', rentalId);
     if (error) throw error;
   },
@@ -374,6 +495,67 @@ export const logRepo = {
 
     const { error } = await supabase.from('agent_logs').insert(data);
     if (error) throw error;
+  },
+
+  /** Recent stream_payment log entries, newest first — used for "earned today" aggregation. */
+  async findRecentByAction(actionPrefix: string, limit = 500): Promise<AgentLogRow[]> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.agent_logs
+        .filter(l => l.action_performed.startsWith(actionPrefix))
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, limit);
+    }
+
+    const { data, error } = await supabase
+      .from('agent_logs')
+      .select('*')
+      .like('action_performed', `${actionPrefix}%`)
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data as AgentLogRow[];
+  },
+
+  /** All log entries whose payload references a given assetId, newest first — the raw feed for the agent activity drawer. */
+  async findByAssetId(assetId: number, limit = 50): Promise<AgentLogRow[]> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.agent_logs
+        .filter(l => (l.payload as { assetId?: number } | undefined)?.assetId === assetId)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, limit);
+    }
+
+    const { data, error } = await supabase
+      .from('agent_logs')
+      .select('*')
+      .contains('payload', { assetId })
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data as AgentLogRow[];
+  },
+
+  /** Carbon/CUC-related log entries for a given agent, newest first. */
+  async findCarbonRelated(agentName: string, limit = 50): Promise<AgentLogRow[]> {
+    if (isMockDb) {
+      const db = readDb();
+      return db.agent_logs
+        .filter(l => l.agent_name === agentName && /cuc|carbon/i.test(l.action_performed))
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, limit);
+    }
+
+    const { data, error } = await supabase
+      .from('agent_logs')
+      .select('*')
+      .eq('agent_name', agentName)
+      .or('action_performed.like.%CUC%,action_performed.like.%carbon%')
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data as AgentLogRow[];
   },
 };
 
