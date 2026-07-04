@@ -4,6 +4,10 @@ rustflags = [
     "-C", "target-feature=-bulk-memory,-sign-ext"
 ]
 
-[unstable]
-build-std = ["core", "alloc"]
-build-std-features = ["compiler-builtins-mem"]
+# NOTE: no [unstable] build-std here. wasm32-unknown-unknown already ships a
+# prebuilt std via `rustup target add` (see rust-toolchain.toml), so building
+# core/alloc from source is unnecessary — and because Cargo's [unstable] table
+# is NOT scoped to [target.wasm32-unknown-unknown], it was being applied to
+# every cargo invocation in this workspace, including `cargo test` for the
+# host target, causing "duplicate lang item" errors (two copies of core/alloc:
+# one from-source, one from the host toolchain).

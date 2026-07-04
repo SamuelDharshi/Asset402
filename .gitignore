@@ -16,6 +16,10 @@ target/
 target-custom/
 target3/
 
+# Odra scaffold sample (nested git repo from `cargo odra new`, not part of
+# the Cargo workspace — see contracts/Cargo.toml's `exclude`)
+contracts/sample/
+
 # Environment configurations and keys
 .env
 .env.local

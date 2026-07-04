@@ -14,6 +14,11 @@ casper-eip-712 = "1.2.0"
 
 [dev-dependencies]
 odra-test = { workspace = true }
+# Used only in #[cfg(test)] to generate real Ed25519 keypairs and sign the
+# real agreement buffer, so tests exercise verify_rental_agreement's actual
+# verification path instead of a bypass. Version pinned to what the workspace
+# already resolves transitively (see Cargo.lock).
+ed25519-dalek = { version = "2.2.0", default-features = false, features = ["alloc"] }
 
 [features]
 default = []
@@ -25,6 +30,7 @@ odra-build = { version = "2.8.2", default-features = false }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 odra-build = { version = "2.8.2", default-features = false }
 odra-cli = { version = "2.8.2", default-features = false }
+openssl = { workspace = true }
 
 [[bin]]
 name = "rental_escrow_build_contract"

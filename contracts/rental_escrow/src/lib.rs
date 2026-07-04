@@ -98,11 +98,24 @@ pub struct RentalAgreement {
     pub nonce:            u64,
 }
 
+/// On-chain reputation record for a renter or owner, built up from
+/// per-session scores submitted by the Guardian Agent after it reviews
+/// a completed rental (condition delta, dispute flags, etc.).
+#[odra::odra_type]
+pub struct ReputationData {
+    /// Number of sessions scored so far.
+    pub total_sessions: u64,
+    /// Running sum of all session scores (each 0–100).
+    pub score_sum:      u64,
+    /// `score_sum / total_sessions`, rounded down. 0 when no sessions yet.
+    pub average_score:  u8,
+}
+
 // ────────────────────────────────────────────────────
 //  Contract Module
 // ────────────────────────────────────────────────────
 
-#[odra::module(events = [RentalStarted, RentalClosed, RentalCancelled])]
+#[odra::module(events = [RentalStarted, RentalClosed, RentalCancelled, ReputationUpdated])]
 pub struct RentalEscrow {
     /// All rental records keyed by RentalId.
     active_rentals:    Mapping<RentalId, RentalData>,
@@ -116,8 +129,12 @@ pub struct RentalEscrow {
     collector_agent:   Var<Address>,
     /// AssetRegistry contract address — called to flip asset status.
     asset_registry:    Var<Address>,
+    /// Guardian Agent — the only account allowed to call `update_reputation`.
+    guardian_address:  Var<Address>,
     /// Contract admin.
     admin:             Var<Address>,
+    /// Reputation record per address (renter or owner), keyed by address.
+    reputation_scores: Mapping<Address, ReputationData>,
 }
 
 // ────────────────────────────────────────────────────
@@ -147,6 +164,14 @@ pub struct RentalCancelled {
     pub asset_id:  AssetId,
 }
 
+#[odra::event]
+pub struct ReputationUpdated {
+    pub address:       Address,
+    pub session_score: u8,
+    pub average_score: u8,
+    pub total_sessions: u64,
+}
+
 // ────────────────────────────────────────────────────
 //  Error Codes
 // ────────────────────────────────────────────────────
@@ -164,8 +189,40 @@ pub enum RentalEscrowError {
     ZeroRate             = 9,
     ZeroDuration         = 10,
     ArithmeticOverflow   = 11,
+    NotGuardian          = 12,
+    InvalidSessionScore  = 13,
 }
 
+/// Builds the exact byte buffer that the renter signs off-chain and that
+/// `verify_rental_agreement` re-derives on-chain to check the signature
+/// against. Kept as one shared function (rather than duplicated per
+/// cfg(test)/not(test) branch) so tests exercise the identical byte layout
+/// that production verification checks — there is no separate "test buffer."
+///
+/// `casper-eip-712` is a listed dependency for a future migration to full
+/// EIP-712 typed-data hashing (it targets Ethereum-style keccak256/secp256k1
+/// recovery); today this uses a simpler domain-tagged flat encoding verified
+/// via native Ed25519, which is a real, non-mock signature scheme — just not
+/// literally EIP-712 yet.
+fn agreement_signing_buffer(agreement: &RentalAgreement) -> Vec<u8> {
+    let domain = b"AssetPilot:RentalEscrow:v1";
+    let mut buf = Vec::new();
+    buf.extend_from_slice(domain);
+    buf.extend_from_slice(&agreement.asset_id.to_le_bytes());
+    buf.extend_from_slice(&agreement.renter_hash);
+    buf.extend_from_slice(&agreement.owner_hash);
+    if let Ok(rate_bytes) = agreement.rate_per_minute.to_bytes() {
+        buf.extend_from_slice(&rate_bytes);
+    }
+    buf.extend_from_slice(&agreement.duration_minutes.to_le_bytes());
+    buf.extend_from_slice(&agreement.valid_until.to_le_bytes());
+    buf.extend_from_slice(&agreement.nonce.to_le_bytes());
+    buf
+}
+
+/// Verifies the renter's Ed25519 signature over `agreement_signing_buffer`.
+/// Runs identically in tests and production — there is no test-only bypass.
+/// A forged signature, wrong key, or tampered agreement field all fail here.
 fn verify_rental_agreement(
     public_key_bytes: &[u8; 32],
     agreement: &RentalAgreement,
@@ -180,37 +237,8 @@ fn verify_rental_agreement(
         Ok(s) => s,
         Err(_) => return false,
     };
-
-    // Construct the EIP-712 Domain for AssetPilot
-    // We assume casper_eip_712 exposes a verification function for typed data.
-    // Given the constraints, we implement a struct-compatible hashing layout 
-    // integrating the crate's logic.
-    let domain = b"AssetPilot:RentalEscrow:v1";
-
-    #[cfg(not(test))]
-    {
-        // On testnet/mainnet, use the real EIP-712 crate
-        // (Assuming standard typed data struct verification signature).
-        // If casper_eip_712 isn't fully stabilised in Odra context, this wraps the Blake2b EIP-712 domain hash payload.
-        let mut buf = Vec::new();
-        buf.extend_from_slice(domain);
-        buf.extend_from_slice(&agreement.asset_id.to_le_bytes());
-        buf.extend_from_slice(&agreement.renter_hash);
-        buf.extend_from_slice(&agreement.owner_hash);
-        if let Ok(rate_bytes) = agreement.rate_per_minute.to_bytes() {
-            buf.extend_from_slice(&rate_bytes);
-        }
-        buf.extend_from_slice(&agreement.duration_minutes.to_le_bytes());
-        buf.extend_from_slice(&agreement.valid_until.to_le_bytes());
-        buf.extend_from_slice(&agreement.nonce.to_le_bytes());
-        
-        odra::casper_types::crypto::verify(&buf, &sig, &pk).is_ok()
-    }
-    #[cfg(test)]
-    {
-        // Mock verification for unit tests
-        public_key_bytes == &[0u8; 32]
-    }
+    let buf = agreement_signing_buffer(agreement);
+    odra::casper_types::crypto::verify(&buf, &sig, &pk).is_ok()
 }
 
 // ────────────────────────────────────────────────────
@@ -221,12 +249,21 @@ fn verify_rental_agreement(
 impl RentalEscrow {
     // ── Initialiser ──────────────────────────────────
 
-    pub fn init(&mut self, collector_agent: Address, asset_registry: Address) {
+    pub fn init(&mut self, collector_agent: Address, asset_registry: Address, guardian_address: Address) {
         let caller = self.env().caller();
         self.admin.set(caller);
         self.collector_agent.set(collector_agent);
         self.asset_registry.set(asset_registry);
+        self.guardian_address.set(guardian_address);
         self.total_rentals.set(0u64);
+    }
+
+    // ── Admin ─────────────────────────────────────────
+
+    /// Update the guardian address (admin only).
+    pub fn set_guardian(&mut self, new_guardian: Address) {
+        self.assert_admin();
+        self.guardian_address.set(new_guardian);
     }
 
     // ── Core Entrypoints ──────────────────────────────
@@ -358,10 +395,55 @@ impl RentalEscrow {
         });
     }
 
+    /// Record a session reputation score for `address` (renter or owner).
+    ///
+    /// Called by the Guardian Agent after it reviews a completed rental
+    /// session (condition delta, dispute flags, on-time return, etc.).
+    /// Scores accumulate into a running average rather than overwriting —
+    /// so a single bad session does not erase an otherwise long, good
+    /// history, matching the PRD's on-chain reputation model.
+    pub fn update_reputation(&mut self, address: Address, session_score: u8) {
+        self.assert_guardian();
+        if session_score > 100 {
+            self.env().revert(RentalEscrowError::InvalidSessionScore);
+        }
+
+        let mut rep = self.reputation_scores.get(&address).unwrap_or(ReputationData {
+            total_sessions: 0,
+            score_sum:      0,
+            average_score:  0,
+        });
+        rep.total_sessions = rep.total_sessions
+            .checked_add(1)
+            .unwrap_or_else(|| self.env().revert(RentalEscrowError::ArithmeticOverflow));
+        rep.score_sum = rep.score_sum
+            .checked_add(session_score as u64)
+            .unwrap_or_else(|| self.env().revert(RentalEscrowError::ArithmeticOverflow));
+        rep.average_score = (rep.score_sum / rep.total_sessions) as u8;
+        self.reputation_scores.set(&address, rep.clone());
+
+        self.env().emit_event(ReputationUpdated {
+            address,
+            session_score,
+            average_score:  rep.average_score,
+            total_sessions: rep.total_sessions,
+        });
+    }
+
     // ── Read-Only Queries ─────────────────────────────
 
     pub fn get_rental(&self, rental_id: RentalId) -> RentalData {
         self.get_rental_or_revert(rental_id)
+    }
+
+    /// Returns the current reputation record for `address`. An address
+    /// with no scored sessions yet returns a zeroed record (average 0).
+    pub fn get_reputation(&self, address: Address) -> ReputationData {
+        self.reputation_scores.get(&address).unwrap_or(ReputationData {
+            total_sessions: 0,
+            score_sum:      0,
+            average_score:  0,
+        })
     }
 
     pub fn get_asset_rental(&self, asset_id: AssetId) -> RentalId {
@@ -392,6 +474,22 @@ impl RentalEscrow {
             self.env().revert(RentalEscrowError::NotCollectorAgent);
         }
     }
+
+    fn assert_guardian(&self) {
+        let caller   = self.env().caller();
+        let guardian = self.guardian_address.get().unwrap();
+        if caller != guardian {
+            self.env().revert(RentalEscrowError::NotGuardian);
+        }
+    }
+
+    fn assert_admin(&self) {
+        let caller = self.env().caller();
+        let admin  = self.admin.get().unwrap();
+        if caller != admin {
+            self.env().revert(RentalEscrowError::NotAdmin);
+        }
+    }
 }
 
 // ════════════════════════════════════════════════════
@@ -401,8 +499,7 @@ impl RentalEscrow {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use odra::host::{Deployer, HostRef, NoArgs};
-    use odra_test::TestEnv;
+    use odra::host::{Deployer, HostRef};
 
     // ── Test helpers ─────────────────────────────────
 
@@ -410,12 +507,12 @@ mod tests {
     /// In production tests the signature would be generated from a known key pair.
     fn make_agreement(asset_id: AssetId, renter: Address, owner: Address, nonce: u64) -> RentalAgreement {
         let renter_bytes = match renter {
-            Address::Account(h) => *h.as_bytes(),
-            Address::Contract(h) => *h.as_bytes(),
+            Address::Account(h) => h.value(),
+            Address::Contract(h) => h.value(),
         };
         let owner_bytes = match owner {
-            Address::Account(h) => *h.as_bytes(),
-            Address::Contract(h) => *h.as_bytes(),
+            Address::Account(h) => h.value(),
+            Address::Contract(h) => h.value(),
         };
         RentalAgreement {
             asset_id,
@@ -428,25 +525,49 @@ mod tests {
         }
     }
 
-    /// Generate a deterministic Ed25519 key pair from a seed for testing.
-    /// Returns (public_key_bytes, private_key_bytes).
-    fn test_keypair(seed: u8) -> ([u8; 32], [u8; 64]) {
-        // Using a zeroed key-pair for unit test pass-through.
-        // Real signature tests use actual Ed25519 signing.
-        ([seed; 32], [seed; 64])
+    /// Generates a real, deterministic Ed25519 keypair from a seed and signs
+    /// `agreement` with it using the exact same buffer `verify_rental_agreement`
+    /// re-derives on-chain. Returns (public_key_bytes, signature_bytes) ready
+    /// to pass straight into `start_rental` — this is a genuine signature,
+    /// not a bypass value.
+    fn sign_agreement(seed: u8, agreement: &RentalAgreement) -> ([u8; 32], [u8; 64]) {
+        use ed25519_dalek::{Signer, SigningKey};
+        let signing_key = SigningKey::from_bytes(&[seed; 32]);
+        let verifying_key = signing_key.verifying_key();
+        let buf = agreement_signing_buffer(agreement);
+        let signature = signing_key.sign(&buf);
+        (verifying_key.to_bytes(), signature.to_bytes())
+    }
+
+    /// A syntactically valid but never-checked keypair, for tests that revert
+    /// before signature verification is reached (e.g. zero-rate, expired
+    /// agreement) — using this instead of `sign_agreement` makes clear the
+    /// test isn't exercising signature logic at all.
+    fn unchecked_keypair() -> ([u8; 32], [u8; 64]) {
+        ([0u8; 32], [0u8; 64])
     }
 
     fn setup() -> (RentalEscrowHostRef, Address, Address, Address, Address) {
-        let te = TestEnv::new();
-        let admin     = te.get_account(0);
-        let renter    = te.get_account(1);
-        let owner     = te.get_account(2);
-        let collector = te.get_account(3);
-        let registry  = te.get_account(4);
-
-        te.set_caller(admin);
-        let escrow = RentalEscrowDeployer::init(&te, collector, registry);
+        let (escrow, admin, renter, owner, collector, _guardian) = setup_with_guardian();
         (escrow, admin, renter, owner, collector)
+    }
+
+    fn setup_with_guardian() -> (RentalEscrowHostRef, Address, Address, Address, Address, Address) {
+        let env = odra_test::env();
+        let admin     = env.get_account(0);
+        let renter    = env.get_account(1);
+        let owner     = env.get_account(2);
+        let collector = env.get_account(3);
+        let registry  = env.get_account(4);
+        let guardian  = env.get_account(5);
+
+        env.set_caller(admin);
+        let escrow = RentalEscrow::deploy(&env, RentalEscrowInitArgs {
+            collector_agent: collector,
+            asset_registry:  registry,
+            guardian_address: guardian,
+        });
+        (escrow, admin, renter, owner, collector, guardian)
     }
 
     // ── Basic tests (signature bypassed via test mock) ──
@@ -460,13 +581,12 @@ mod tests {
     #[test]
     fn test_start_rental_rejects_expired_agreement() {
         let (mut escrow, admin, renter, owner, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        escrow.env().set_caller(admin);
 
         let mut agreement = make_agreement(1, renter, owner, 1);
         agreement.valid_until = 0; // already expired
 
-        let (pk, sig_bytes) = test_keypair(1);
+        let (pk, sig_bytes) = unchecked_keypair(); // never reached — expiry check runs first
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             escrow.start_rental(agreement, renter, owner, pk, sig_bytes);
         }));
@@ -474,20 +594,68 @@ mod tests {
     }
 
     #[test]
-    fn test_nonce_replay_protection() {
-        // After a successful start, trying the same nonce again must fail.
-        // We simulate by marking the nonce used directly and then attempting.
-        let (escrow, _, renter, _, _) = setup();
-        // Nonce 42 is not used
-        assert!(!escrow.is_nonce_used(renter, 42));
+    fn test_start_rental_accepts_valid_signature() {
+        let (mut escrow, admin, renter, owner, _) = setup();
+        escrow.env().set_caller(admin);
+
+        let agreement = make_agreement(1, renter, owner, 1);
+        let (pk, sig) = sign_agreement(7, &agreement);
+
+        let rental_id = escrow.start_rental(agreement, renter, owner, pk, sig);
+        assert_eq!(rental_id, 1);
+        assert!(escrow.is_nonce_used(renter, 1));
+
+        let rental = escrow.get_rental(rental_id);
+        assert_eq!(rental.status, RentalStatus::Active);
+        assert_eq!(rental.renter, renter);
+        assert_eq!(rental.owner, owner);
+    }
+
+    #[test]
+    fn test_start_rental_rejects_forged_signature() {
+        let (mut escrow, admin, renter, owner, _) = setup();
+        escrow.env().set_caller(admin);
+
+        let agreement = make_agreement(1, renter, owner, 1);
+        // Sign with seed 7 but present seed 9's public key — signature/key mismatch.
+        let (_, sig) = sign_agreement(7, &agreement);
+        let (wrong_pk, _) = sign_agreement(9, &agreement);
+
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            escrow.start_rental(agreement, renter, owner, wrong_pk, sig);
+        }));
+        assert!(result.is_err(), "Forged/mismatched signature must revert with InvalidSignature");
+    }
+
+    #[test]
+    fn test_nonce_replay_protection_actually_replays() {
+        let (mut escrow, admin, renter, owner, _) = setup();
+        escrow.env().set_caller(admin);
+
+        let agreement = make_agreement(1, renter, owner, 5);
+        let (pk, sig) = sign_agreement(3, &agreement);
+
+        // First use of nonce 5 succeeds.
+        let rental_id = escrow.start_rental(agreement.clone(), renter, owner, pk, sig);
+        assert_eq!(rental_id, 1);
+        assert!(escrow.is_nonce_used(renter, 5));
+
+        // Second attempt with the SAME nonce (different asset_id, still same
+        // (renter, nonce) key) must revert with NonceAlreadyUsed — this is
+        // the actual replay this test previously never performed.
+        let replay = make_agreement(2, renter, owner, 5);
+        let (pk2, sig2) = sign_agreement(3, &replay);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            escrow.start_rental(replay, renter, owner, pk2, sig2);
+        }));
+        assert!(result.is_err(), "Reusing a consumed nonce must revert");
     }
 
     #[test]
     fn test_close_rental_by_non_collector_reverts() {
         let (mut escrow, admin, _, _, _) = setup();
-        let te = TestEnv::new();
         // rental 999 doesn't exist; admin calling close_rental should revert on NotCollectorAgent
-        te.set_caller(admin);
+        escrow.env().set_caller(admin);
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             escrow.close_rental(999);
         }));
@@ -497,11 +665,10 @@ mod tests {
     #[test]
     fn test_zero_rate_reverts() {
         let (mut escrow, admin, renter, owner, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        escrow.env().set_caller(admin);
         let mut agreement = make_agreement(1, renter, owner, 1);
         agreement.rate_per_minute = U128::zero();
-        let (pk, sig) = test_keypair(1);
+        let (pk, sig) = unchecked_keypair(); // never reached — zero-rate check runs first
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             escrow.start_rental(agreement, renter, owner, pk, sig);
         }));
@@ -512,33 +679,99 @@ mod tests {
 
     #[test]
     fn test_e2e_full_rental_lifecycle_with_streaming() {
-        // This test exercises the full path using the Odra TestEnv.
-        // Signature verification is stubbed in test builds by always passing
-        // when the public key equals [0u8; 32] (the test sentinel).
-        //
-        // The companion integration test (scripts/simulate-ecosystem.ts)
-        // exercises real Ed25519 key generation.
+        // Exercises the full path using the Odra test host env with a genuine
+        // Ed25519 signature (via sign_agreement) — no test-only bypass.
+        let env = odra_test::env();
+        let admin     = env.get_account(0);
+        let renter    = env.get_account(1);
+        let owner     = env.get_account(2);
+        let collector = env.get_account(3);
+        let registry  = env.get_account(4);
+        let guardian  = env.get_account(5);
+        env.set_caller(admin);
+        let mut escrow = RentalEscrow::deploy(&env, RentalEscrowInitArgs {
+            collector_agent: collector,
+            asset_registry:  registry,
+            guardian_address: guardian,
+        });
 
-        let te = TestEnv::new();
-        let admin     = te.get_account(0);
-        let collector = te.get_account(3);
-        let registry  = te.get_account(4);
-        te.set_caller(admin);
-        let mut escrow = RentalEscrowDeployer::init(&te, collector, registry);
-
-        // Confirm initial state
         assert_eq!(escrow.total_rentals(), 0);
 
         // Collector closes a non-existent rental → should revert
-        te.set_caller(collector);
+        escrow.env().set_caller(collector);
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             escrow.close_rental(1);
         }));
         assert!(result.is_err(), "Closing non-existent rental should revert");
 
-        // Confirm nonce tracking is clean
-        let renter = te.get_account(1);
+        // Start a real, signature-verified rental
         assert!(!escrow.is_nonce_used(renter, 1));
-        assert!(!escrow.is_nonce_used(renter, 2));
+        escrow.env().set_caller(admin);
+        let agreement = make_agreement(1, renter, owner, 1);
+        let (pk, sig) = sign_agreement(11, &agreement);
+        let rental_id = escrow.start_rental(agreement, renter, owner, pk, sig);
+        assert!(escrow.is_nonce_used(renter, 1));
+
+        // Collector streams two payments, then closes the rental
+        escrow.env().set_caller(collector);
+        escrow.record_stream_payment(rental_id, U128::from(34_000_000u64));
+        escrow.record_stream_payment(rental_id, U128::from(34_000_000u64));
+
+        let mid_rental = escrow.get_rental(rental_id);
+        assert_eq!(mid_rental.total_streamed, U128::from(68_000_000u64));
+        assert_eq!(mid_rental.status, RentalStatus::Active);
+
+        escrow.close_rental(rental_id);
+        let closed_rental = escrow.get_rental(rental_id);
+        assert_eq!(closed_rental.status, RentalStatus::Closed);
+        assert_eq!(closed_rental.total_streamed, U128::from(68_000_000u64));
+    }
+
+    // ── Reputation ────────────────────────────────────
+
+    #[test]
+    fn test_reputation_defaults_to_zero() {
+        let (escrow, _, renter, _, _, _) = setup_with_guardian();
+        let rep = escrow.get_reputation(renter);
+        assert_eq!(rep.total_sessions, 0);
+        assert_eq!(rep.score_sum, 0);
+        assert_eq!(rep.average_score, 0);
+    }
+
+    #[test]
+    fn test_guardian_can_update_reputation_and_averages_across_sessions() {
+        let (mut escrow, _, renter, _, _, guardian) = setup_with_guardian();
+        escrow.env().set_caller(guardian);
+
+        escrow.update_reputation(renter, 90);
+        let rep = escrow.get_reputation(renter);
+        assert_eq!(rep.total_sessions, 1);
+        assert_eq!(rep.average_score, 90);
+
+        escrow.update_reputation(renter, 70);
+        let rep = escrow.get_reputation(renter);
+        assert_eq!(rep.total_sessions, 2);
+        assert_eq!(rep.score_sum, 160);
+        assert_eq!(rep.average_score, 80);
+    }
+
+    #[test]
+    fn test_non_guardian_cannot_update_reputation() {
+        let (mut escrow, admin, renter, _, _, _) = setup_with_guardian();
+        escrow.env().set_caller(admin);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            escrow.update_reputation(renter, 80);
+        }));
+        assert!(result.is_err(), "Non-guardian should not be able to update reputation");
+    }
+
+    #[test]
+    fn test_update_reputation_rejects_score_over_100() {
+        let (mut escrow, _, renter, _, _, guardian) = setup_with_guardian();
+        escrow.env().set_caller(guardian);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            escrow.update_reputation(renter, 101);
+        }));
+        assert!(result.is_err(), "Score over 100 should revert");
     }
 }

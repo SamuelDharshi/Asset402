@@ -18,6 +18,13 @@ license     = "Apache-2.0"
 [workspace.dependencies]
 odra        = { version = "2.8.0", default-features = false }
 odra-test   = { version = "2.8.0" }
+# Forces openssl-sys (pulled in transitively via odra-cli -> casper-client ->
+# reqwest -> native-tls) to build OpenSSL from source instead of requiring a
+# system pkg-config + libssl-dev install. Needed for `cargo test` on hosts
+# without those system packages (e.g. a fresh WSL/CI image); a C compiler +
+# perl + make are the only requirements, which the Rust toolchain already
+# needs anyway.
+openssl     = { version = "0.10", features = ["vendored"] }
 
 [profile.release]
 codegen-units = 1
