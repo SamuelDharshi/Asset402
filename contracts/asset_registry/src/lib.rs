@@ -364,26 +364,24 @@ impl AssetRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use odra::host::{Deployer, HostRef, NoArgs};
-    use odra_test::TestEnv;
+    use odra::host::{Deployer, HostRef};
 
     // Helper — deploys the contract and returns a HostRef + test accounts
     fn setup() -> (AssetRegistryHostRef, Address, Address, Address, Address) {
-        let test_env = TestEnv::new();
+        let env = odra_test::env();
 
-        let admin         = test_env.get_account(0);
-        let guardian      = test_env.get_account(1);
-        let lending_pool  = test_env.get_account(2);
-        let rental_escrow = test_env.get_account(3);
+        let admin         = env.get_account(0);
+        let guardian      = env.get_account(1);
+        let lending_pool  = env.get_account(2);
+        let rental_escrow = env.get_account(3);
 
-        test_env.set_caller(admin);
+        env.set_caller(admin);
 
-        let registry = AssetRegistryDeployer::init(
-            &test_env,
-            guardian,
-            lending_pool,
-            rental_escrow,
-        );
+        let registry = AssetRegistry::deploy(&env, AssetRegistryInitArgs {
+            guardian_address:      guardian,
+            lending_pool_address:  lending_pool,
+            rental_escrow_address: rental_escrow,
+        });
 
         (registry, admin, guardian, lending_pool, rental_escrow)
     }
@@ -393,8 +391,7 @@ mod tests {
     #[test]
     fn test_mint_asset_increments_counter() {
         let (mut registry, admin, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
 
         let id1 = registry.mint_asset(
             admin,
@@ -419,8 +416,7 @@ mod tests {
     #[test]
     fn test_mint_stores_metadata_correctly() {
         let (mut registry, admin, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
 
         let owner = admin;
         let id = registry.mint_asset(
@@ -442,8 +438,7 @@ mod tests {
     #[test]
     fn test_owner_asset_index_updated() {
         let (mut registry, admin, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
 
         registry.mint_asset(admin, "Tractor".into(), 9000, 80, "Qm1".into());
         registry.mint_asset(admin, "Camera".into(), 3500, 90, "Qm2".into());
@@ -457,8 +452,7 @@ mod tests {
     #[test]
     fn test_mint_invalid_condition_score_reverts() {
         let (mut registry, admin, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
 
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             registry.mint_asset(admin, "Tractor".into(), 9000, 101, "Qm1".into());
@@ -471,11 +465,10 @@ mod tests {
     #[test]
     fn test_guardian_can_update_condition() {
         let (mut registry, admin, guardian, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         let id = registry.mint_asset(admin, "Tractor".into(), 9000, 78, "Qm1".into());
 
-        te.set_caller(guardian);
+        registry.env().set_caller(guardian);
         registry.update_condition(id, 70, 8500, "QmUpdated".into());
 
         let meta = registry.get_asset(id);
@@ -487,8 +480,7 @@ mod tests {
     #[test]
     fn test_non_guardian_cannot_update_condition() {
         let (mut registry, admin, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         let id = registry.mint_asset(admin, "Tractor".into(), 9000, 78, "Qm1".into());
 
         // admin tries to update condition — not the guardian
@@ -503,8 +495,7 @@ mod tests {
     #[test]
     fn test_owner_can_set_listed_status() {
         let (mut registry, admin, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         let id = registry.mint_asset(admin, "Tractor".into(), 9000, 78, "Qm1".into());
 
         registry.set_listing_status(id, AssetStatus::Listed);
@@ -515,11 +506,10 @@ mod tests {
     #[test]
     fn test_lending_pool_can_lock_asset() {
         let (mut registry, admin, _, lending_pool, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         let id = registry.mint_asset(admin, "Tractor".into(), 9000, 78, "Qm1".into());
 
-        te.set_caller(lending_pool);
+        registry.env().set_caller(lending_pool);
         registry.set_listing_status(id, AssetStatus::Locked);
 
         let meta = registry.get_asset(id);
@@ -529,11 +519,10 @@ mod tests {
     #[test]
     fn test_lending_pool_can_release_collateral() {
         let (mut registry, admin, _, lending_pool, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         let id = registry.mint_asset(admin, "Tractor".into(), 9000, 78, "Qm1".into());
 
-        te.set_caller(lending_pool);
+        registry.env().set_caller(lending_pool);
         registry.set_listing_status(id, AssetStatus::Locked);
         registry.release_collateral(id);
 
@@ -546,10 +535,9 @@ mod tests {
     #[test]
     fn test_e2e_asset_lifecycle() {
         let (mut registry, admin, guardian, lending_pool, rental_escrow) = setup();
-        let te = TestEnv::new();
 
         // 1. Mint
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         let asset_id = registry.mint_asset(
             admin,
             "Mahindra 575 DI Tractor".into(),
@@ -564,22 +552,22 @@ mod tests {
         assert_eq!(registry.get_asset(asset_id).status, AssetStatus::Listed);
 
         // 3. Lock as collateral (lending pool)
-        te.set_caller(lending_pool);
+        registry.env().set_caller(lending_pool);
         registry.set_listing_status(asset_id, AssetStatus::Locked);
         assert_eq!(registry.get_asset(asset_id).status, AssetStatus::Locked);
 
         // 4. Guardian updates condition mid-loan
-        te.set_caller(guardian);
+        registry.env().set_caller(guardian);
         registry.update_condition(asset_id, 72, 8700, "QmTractorUpdated".into());
         assert_eq!(registry.get_asset(asset_id).condition_score, 72);
 
         // 5. Loan repaid — release collateral
-        te.set_caller(lending_pool);
+        registry.env().set_caller(lending_pool);
         registry.release_collateral(asset_id);
         assert_eq!(registry.get_asset(asset_id).status, AssetStatus::Idle);
 
         // 6. Rental escrow sets to Rented
-        te.set_caller(rental_escrow);
+        registry.env().set_caller(rental_escrow);
         registry.set_listing_status(asset_id, AssetStatus::Rented);
         assert_eq!(registry.get_asset(asset_id).status, AssetStatus::Rented);
 

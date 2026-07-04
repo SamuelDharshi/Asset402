@@ -194,9 +194,14 @@ impl LendingPool {
     // ── LP Deposits ───────────────────────────────────
 
     /// Deposit CSPR into the lending pool as a liquidity provider.
-    /// The deposited amount is tracked off the native token transfer.
-    /// In production the function reads `self.env().attached_value()`.
-    pub fn deposit(&mut self, amount_motes: U128) {
+    /// The deposited amount is the actual native token attached to this call
+    /// (`self.env().attached_value()`), never a caller-supplied parameter —
+    /// trusting a claimed amount would let an LP record a deposit larger than
+    /// what they actually sent.
+    #[odra(payable)]
+    pub fn deposit(&mut self) {
+        let attached = self.env().attached_value();
+        let amount_motes = U128::from(attached.as_u128());
         if amount_motes == U128::zero() {
             self.env().revert(LendingPoolError::ZeroAmount);
         }
@@ -299,9 +304,13 @@ impl LendingPool {
     /// outstanding loan balance.  Returns the updated `LoanStatus`.
     ///
     /// Split per spec:
-    /// * 64% → owner (handled off-chain by Collector Agent before calling this)
-    /// * 30% → loan repayment (this call receives 30%)
-    /// * 6%  → protocol fee vault (deducted here from the 30%)
+    /// * 64% → owner — this contract does NOT hold or move this share. It is a
+    ///   direct wallet-to-wallet CSPR transfer executed off-chain by the
+    ///   Collector Agent (agents/src/collector-agent.ts:dispatchTransfer),
+    ///   confirmed via RPC before being treated as delivered. This contract has
+    ///   no visibility into that transfer — it only ever sees the 30% below.
+    /// * 30% → loan repayment (this call receives exactly this slice as `amount_motes`)
+    /// * 6%  → protocol fee vault (deducted here from the 30%, not from the 64%)
     pub fn record_repayment(
         &mut self,
         asset_id:     AssetId,
@@ -431,22 +440,25 @@ impl LendingPool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use odra::host::{Deployer, HostRef, NoArgs};
-    use odra_test::TestEnv;
-    use odra::casper_types::U256;
+    use odra::host::{Deployer, HostRef};
+    use odra::casper_types::U512;
 
     fn setup() -> (LendingPoolHostRef, Address, Address, Address, Address, Address) {
-        let te = TestEnv::new();
+        let env = odra_test::env();
 
-        let admin     = te.get_account(0);
-        let lp1       = te.get_account(1);
-        let borrower  = te.get_account(2);
-        let collector = te.get_account(3);
-        let risk      = te.get_account(4);
-        let fee_vault = te.get_account(5);
+        let admin     = env.get_account(0);
+        let lp1       = env.get_account(1);
+        let borrower  = env.get_account(2);
+        let collector = env.get_account(3);
+        let risk      = env.get_account(4);
+        let fee_vault = env.get_account(5);
 
-        te.set_caller(admin);
-        let pool = LendingPoolDeployer::init(&te, collector, risk, fee_vault);
+        env.set_caller(admin);
+        let pool = LendingPool::deploy(&env, LendingPoolInitArgs {
+            collector_agent: collector,
+            risk_agent:      risk,
+            fee_vault,
+        });
 
         (pool, admin, lp1, borrower, collector, risk)
     }
@@ -456,21 +468,61 @@ mod tests {
     #[test]
     fn test_lp_deposit_recorded() {
         let (mut pool, _, lp1, _, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(lp1);
-        pool.deposit(10_000_000_000u128); // 10 CSPR
-        assert_eq!(pool.get_deposit(lp1), 10_000_000_000u128);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(10_000_000_000u64)).deposit(); // 10 CSPR attached
+        assert_eq!(pool.get_deposit(lp1), U128::from(10_000_000_000u128));
     }
 
     #[test]
     fn test_multiple_lp_deposits() {
         let (mut pool, _, lp1, borrower, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(lp1);
-        pool.deposit(20_000_000_000u128);
-        te.set_caller(borrower);
-        pool.deposit(30_000_000_000u128);
-        assert_eq!(pool.available_liquidity(), 50_000_000_000u128);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(20_000_000_000u64)).deposit();
+        pool.env().set_caller(borrower);
+        pool.with_tokens(U512::from(30_000_000_000u64)).deposit();
+        assert_eq!(pool.available_liquidity(), U128::from(50_000_000_000u128));
+    }
+
+    /// Regression test for the fixed bug: deposit() must record the actual
+    /// attached CSPR, not a caller-supplied parameter. Attaching two different
+    /// amounts from two callers and asserting each balance matches exactly
+    /// what was attached (not what a hypothetical client-side claim could say)
+    /// proves the parameter-trusting path no longer exists — there is no
+    /// parameter to lie about anymore.
+    #[test]
+    fn test_deposit_uses_attached_value_not_param() {
+        let (mut pool, _, lp1, borrower, _, _) = setup();
+
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(7_000_000_000u64)).deposit(); // 7 CSPR
+        assert_eq!(pool.get_deposit(lp1), U128::from(7_000_000_000u128));
+
+        pool.env().set_caller(borrower);
+        pool.with_tokens(U512::from(3_500_000_000u64)).deposit(); // 3.5 CSPR
+        assert_eq!(pool.get_deposit(borrower), U128::from(3_500_000_000u128));
+
+        assert_eq!(pool.available_liquidity(), U128::from(10_500_000_000u128));
+    }
+
+    #[test]
+    fn test_deposit_zero_attached_value_reverts() {
+        let (mut pool, _, lp1, _, _, _) = setup();
+        pool.env().set_caller(lp1);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            pool.with_tokens(U512::from(0u64)).deposit();
+        }));
+        assert!(result.is_err(), "Depositing with zero attached CSPR must revert");
+    }
+
+    #[test]
+    fn test_multiple_deposits_accumulate_from_attached_value() {
+        let (mut pool, _, lp1, _, _, _) = setup();
+
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(4_000_000_000u64)).deposit();
+        pool.with_tokens(U512::from(6_000_000_000u64)).deposit();
+
+        assert_eq!(pool.get_deposit(lp1), U128::from(10_000_000_000u128));
     }
 
     // ── Loan Origination ──────────────────────────────
@@ -478,33 +530,31 @@ mod tests {
     #[test]
     fn test_loan_origination_at_70_ltv() {
         let (mut pool, admin, lp1, borrower, _, _) = setup();
-        let te = TestEnv::new();
 
         // LP funds pool
-        te.set_caller(lp1);
-        pool.deposit(100_000_000_000u128); // 100 CSPR
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(100_000_000_000u64)).deposit(); // 100 CSPR
 
         // Originate loan at exactly 70% LTV
-        te.set_caller(admin);
-        pool.originate_loan(1u64, borrower, 70_000_000_000u128, 7000u16);
+        pool.env().set_caller(admin);
+        pool.originate_loan(1u64, borrower, 70_000_000_000u128.into(), 7000u32);
 
         let loan = pool.get_loan(1u64);
         assert_eq!(loan.status, LoanStatus::Active);
-        assert_eq!(loan.principal_motes, 70_000_000_000u128);
-        assert_eq!(loan.remaining_motes, 70_000_000_000u128);
-        assert_eq!(pool.total_outstanding(), 70_000_000_000u128);
+        assert_eq!(loan.principal_motes, U128::from(70_000_000_000u128));
+        assert_eq!(loan.remaining_motes, U128::from(70_000_000_000u128));
+        assert_eq!(pool.total_outstanding(), U128::from(70_000_000_000u128));
     }
 
     #[test]
     fn test_loan_rejected_above_70_ltv() {
         let (mut pool, admin, lp1, borrower, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(lp1);
-        pool.deposit(100_000_000_000u128);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(100_000_000_000u64)).deposit();
 
-        te.set_caller(admin);
+        pool.env().set_caller(admin);
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            pool.originate_loan(1u64, borrower, 71_000_000_000u128, 7100u16);
+            pool.originate_loan(1u64, borrower, 71_000_000_000u128.into(), 7100u32);
         }));
         assert!(result.is_err(), "Should revert on LTV > 70%");
     }
@@ -514,16 +564,15 @@ mod tests {
     #[test]
     fn test_repayment_reduces_outstanding_debt() {
         let (mut pool, admin, lp1, borrower, collector, _) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(lp1);
-        pool.deposit(100_000_000_000u128);
-        te.set_caller(admin);
-        pool.originate_loan(1u64, borrower, 70_000_000_000u128, 7000u16);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(100_000_000_000u64)).deposit();
+        pool.env().set_caller(admin);
+        pool.originate_loan(1u64, borrower, 70_000_000_000u128.into(), 7000u32);
 
         // Collector records a 30 CSPR repayment
-        te.set_caller(collector);
-        let status = pool.record_repayment(1u64, 30_000_000_000u128);
+        pool.env().set_caller(collector);
+        let status = pool.record_repayment(1u64, 30_000_000_000u128.into());
         assert_eq!(status, LoanStatus::Active);
 
         let loan = pool.get_loan(1u64);
@@ -531,38 +580,36 @@ mod tests {
         // remaining = 70 - 28.2 = 41.8 CSPR
         let expected_fee = 30_000_000_000u128 * 600 / 10_000; // 1_800_000_000
         let expected_net = 30_000_000_000u128 - expected_fee;  // 28_200_000_000
-        assert_eq!(loan.remaining_motes, 70_000_000_000u128 - expected_net);
+        assert_eq!(loan.remaining_motes, U128::from(70_000_000_000u128 - expected_net));
     }
 
     #[test]
     fn test_full_repayment_marks_loan_repaid() {
         let (mut pool, admin, lp1, borrower, collector, _) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(lp1);
-        pool.deposit(100_000_000_000u128);
-        te.set_caller(admin);
-        pool.originate_loan(1u64, borrower, 10_000_000_000u128, 7000u16);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(100_000_000_000u64)).deposit();
+        pool.env().set_caller(admin);
+        pool.originate_loan(1u64, borrower, 10_000_000_000u128.into(), 7000u32);
 
         // Repay a large amount that exceeds the principal
-        te.set_caller(collector);
-        let status = pool.record_repayment(1u64, 200_000_000_000u128);
+        pool.env().set_caller(collector);
+        let status = pool.record_repayment(1u64, 200_000_000_000u128.into());
         assert_eq!(status, LoanStatus::Repaid);
-        assert_eq!(pool.get_loan(1u64).remaining_motes, 0u128);
+        assert_eq!(pool.get_loan(1u64).remaining_motes, U128::zero());
     }
 
     #[test]
     fn test_non_collector_cannot_record_repayment() {
         let (mut pool, admin, lp1, borrower, _, _) = setup();
-        let te = TestEnv::new();
-        te.set_caller(lp1);
-        pool.deposit(100_000_000_000u128);
-        te.set_caller(admin);
-        pool.originate_loan(1u64, borrower, 10_000_000_000u128, 7000u16);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(100_000_000_000u64)).deposit();
+        pool.env().set_caller(admin);
+        pool.originate_loan(1u64, borrower, 10_000_000_000u128.into(), 7000u32);
 
-        te.set_caller(admin); // not the collector
+        pool.env().set_caller(admin); // not the collector
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            pool.record_repayment(1u64, 5_000_000_000u128);
+            pool.record_repayment(1u64, 5_000_000_000u128.into());
         }));
         assert!(result.is_err(), "Only collector agent may record repayment");
     }
@@ -572,25 +619,24 @@ mod tests {
     #[test]
     fn test_e2e_borrow_and_stream_repayment() {
         let (mut pool, admin, lp1, borrower, collector, _) = setup();
-        let te = TestEnv::new();
 
         // LP deposits 100 CSPR
-        te.set_caller(lp1);
-        pool.deposit(100_000_000_000u128);
+        pool.env().set_caller(lp1);
+        pool.with_tokens(U512::from(100_000_000_000u64)).deposit();
 
         // Asset owner borrows 60 CSPR (60% LTV)
-        te.set_caller(admin);
-        pool.originate_loan(1u64, borrower, 60_000_000_000u128, 6000u16);
+        pool.env().set_caller(admin);
+        pool.originate_loan(1u64, borrower, 60_000_000_000u128.into(), 6000u32);
 
         let mut loan = pool.get_loan(1u64);
         assert_eq!(loan.status, LoanStatus::Active);
 
         // Simulate 3 streaming repayments of 10 CSPR each (Collector Agent)
-        te.set_caller(collector);
+        pool.env().set_caller(collector);
         for _ in 0..3 {
-            let status = pool.record_repayment(1u64, 10_000_000_000u128);
+            let status = pool.record_repayment(1u64, 10_000_000_000u128.into());
             loan = pool.get_loan(1u64);
-            if loan.remaining_motes == 0 {
+            if loan.remaining_motes == U128::zero() {
                 assert_eq!(status, LoanStatus::Repaid);
                 break;
             } else {
@@ -599,7 +645,7 @@ mod tests {
         }
         // After 3 × 10 CSPR (net ~9.4 CSPR each): debt shrinks substantially
         let final_loan = pool.get_loan(1u64);
-        assert!(final_loan.remaining_motes < 60_000_000_000u128,
+        assert!(final_loan.remaining_motes < U128::from(60_000_000_000u128),
             "Remaining debt must decrease with each repayment");
     }
 }

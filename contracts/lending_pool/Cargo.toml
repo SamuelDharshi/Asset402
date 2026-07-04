@@ -24,6 +24,7 @@ odra-build = { version = "2.8.2", default-features = false }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 odra-build = { version = "2.8.2", default-features = false }
 odra-cli = { version = "2.8.2", default-features = false }
+openssl = { workspace = true }
 
 [[bin]]
 name = "lending_pool_build_contract"

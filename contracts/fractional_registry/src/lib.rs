@@ -15,6 +15,7 @@
 extern crate alloc;
 
 use odra::prelude::*;
+use odra::casper_types::U512;
 
 // ────────────────────────────────────────────────────
 //  Data Structs
@@ -67,6 +68,13 @@ pub struct IncomeDistributed {
     pub shares_sold: u64,
 }
 
+#[odra::event]
+pub struct IncomeClaimed {
+    pub offering_id: u64,
+    pub investor: Address,
+    pub amount_motes: u64,
+}
+
 // ────────────────────────────────────────────────────
 //  Error Codes
 // ────────────────────────────────────────────────────
@@ -81,18 +89,23 @@ pub enum FractionalRegistryError {
     ZeroShares           = 6,
     ZeroPrice            = 7,
     NoSharesSold         = 8,
+    NotAShareholder      = 9,
+    NothingToClaim       = 10,
 }
 
 // ────────────────────────────────────────────────────
 //  Contract Module
 // ────────────────────────────────────────────────────
 
-#[odra::module(events = [OfferingCreated, SharesPurchased, IncomeDistributed])]
+#[odra::module(events = [OfferingCreated, SharesPurchased, IncomeDistributed, IncomeClaimed])]
 pub struct FractionalRegistry {
     /// All fractional offerings indexed by offering ID.
     offerings: Mapping<u64, OfferingData>,
     /// Shares held per investor per offering: (offering_id, investor) → share_count.
     shares: Mapping<(u64, Address), u64>,
+    /// Per-investor high-water mark of `income_per_share_motes` already paid
+    /// out, so `claim_income` only ever pays the unclaimed delta.
+    claimed_per_share_motes: Mapping<(u64, Address), u64>,
     /// Auto-incrementing offering ID counter.
     next_offering_id: Var<u64>,
     /// Contract administrator (deployer).
@@ -162,6 +175,7 @@ impl FractionalRegistry {
     /// The caller **must** attach exactly `share_count * price_per_share_motes`
     /// in CSPR payment. CSPR is transferred to the offering owner.
     /// Emits [`SharesPurchased`].
+    #[odra(payable)]
     pub fn buy_shares(&mut self, offering_id: u64, share_count: u64) {
         if share_count == 0 {
             self.env().revert(FractionalRegistryError::ZeroShares);
@@ -216,6 +230,7 @@ impl FractionalRegistry {
     /// > **Note:** On-chain iteration over shareholders is not possible with a
     /// > `Mapping`. This entrypoint records the per-share income rate;
     /// > investors claim their portion via `claim_income` (see below).
+    #[odra(payable)]
     pub fn distribute_income(&mut self, offering_id: u64) {
         self.assert_admin();
 
@@ -238,6 +253,41 @@ impl FractionalRegistry {
         });
     }
 
+    /// Pull-pay an investor's accrued, unclaimed share of income for an
+    /// offering. `distribute_income` only records a per-share rate (Odra
+    /// mappings can't be iterated on-chain to push to every holder), so this
+    /// is how investors actually receive their CSPR.
+    ///
+    /// Owed amount = investor_shares × (income_per_share_motes − already_claimed_per_share).
+    /// Reverts if the caller holds no shares in this offering, or if nothing
+    /// new has accrued since their last claim.
+    pub fn claim_income(&mut self, offering_id: u64) {
+        let offering = self.get_offering_or_revert(offering_id);
+        let investor = self.env().caller();
+
+        let share_count = self.shares.get_or_default(&(offering_id, investor));
+        if share_count == 0 {
+            self.env().revert(FractionalRegistryError::NotAShareholder);
+        }
+
+        let already_claimed = self.claimed_per_share_motes.get_or_default(&(offering_id, investor));
+        let owed_per_share = offering.income_per_share_motes.saturating_sub(already_claimed);
+        if owed_per_share == 0 {
+            self.env().revert(FractionalRegistryError::NothingToClaim);
+        }
+
+        let owed_total = owed_per_share * share_count;
+        self.claimed_per_share_motes.set(&(offering_id, investor), offering.income_per_share_motes);
+
+        self.env().transfer_tokens(&investor, &U512::from(owed_total));
+
+        self.env().emit_event(IncomeClaimed {
+            offering_id,
+            investor,
+            amount_motes: owed_total,
+        });
+    }
+
     // ── Read-Only Queries ─────────────────────────────
 
     /// Fetch full data for a given offering ID.
@@ -248,6 +298,12 @@ impl FractionalRegistry {
     /// Return the number of shares held by `investor` in a given offering.
     pub fn get_shares(&self, offering_id: u64, investor: Address) -> u64 {
         self.shares.get_or_default(&(offering_id, investor))
+    }
+
+    /// Return the `income_per_share_motes` value `investor` has already
+    /// claimed for a given offering (0 if they've never claimed).
+    pub fn get_claimed_per_share(&self, offering_id: u64, investor: Address) -> u64 {
+        self.claimed_per_share_motes.get_or_default(&(offering_id, investor))
     }
 
     // ── Internal Helpers ──────────────────────────────
@@ -278,15 +334,15 @@ impl FractionalRegistry {
 mod tests {
     use super::*;
     use odra::host::{Deployer, HostRef, NoArgs};
-    use odra_test::TestEnv;
+    use odra::casper_types::U512;
 
     fn setup() -> (FractionalRegistryHostRef, Address, Address) {
-        let test_env = TestEnv::new();
-        let admin = test_env.get_account(0);
-        let investor = test_env.get_account(1);
+        let env = odra_test::env();
+        let admin = env.get_account(0);
+        let investor = env.get_account(1);
 
-        test_env.set_caller(admin);
-        let registry = FractionalRegistryDeployer::init(&test_env);
+        env.set_caller(admin);
+        let registry = FractionalRegistry::deploy(&env, NoArgs);
 
         (registry, admin, investor)
     }
@@ -347,14 +403,12 @@ mod tests {
     #[test]
     fn test_buy_shares_updates_mapping() {
         let (mut registry, admin, investor) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         registry.create_offering(1, 100, 1_000_000_000u64);
 
-        te.set_caller(investor);
-        te.set_value(10_000_000_000u64.into()); // 10 shares × 1 CSPR
-        registry.buy_shares(1, 10);
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10); // 10 shares × 1 CSPR
 
         assert_eq!(registry.get_shares(1, investor), 10);
         let offering = registry.get_offering(1);
@@ -365,14 +419,12 @@ mod tests {
     #[test]
     fn test_buy_all_shares_deactivates_offering() {
         let (mut registry, admin, investor) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         registry.create_offering(1, 5, 1_000_000_000u64);
 
-        te.set_caller(investor);
-        te.set_value(5_000_000_000u64.into()); // 5 shares × 1 CSPR
-        registry.buy_shares(1, 5);
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(5_000_000_000u64)).buy_shares(1, 5); // 5 shares × 1 CSPR
 
         let offering = registry.get_offering(1);
         assert!(!offering.active);
@@ -382,15 +434,13 @@ mod tests {
     #[test]
     fn test_insufficient_payment_reverts() {
         let (mut registry, admin, investor) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         registry.create_offering(1, 100, 1_000_000_000u64);
 
-        te.set_caller(investor);
-        te.set_value(1u64.into()); // way less than required
+        registry.env().set_caller(investor);
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            registry.buy_shares(1, 10);
+            registry.with_tokens(U512::from(1u64)).buy_shares(1, 10); // way less than required
         }));
         assert!(result.is_err(), "Should revert on insufficient payment");
     }
@@ -411,18 +461,15 @@ mod tests {
     #[test]
     fn test_distribute_income_updates_per_share_rate() {
         let (mut registry, admin, investor) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         registry.create_offering(1, 100, 1_000_000_000u64);
 
-        te.set_caller(investor);
-        te.set_value(10_000_000_000u64.into());
-        registry.buy_shares(1, 10);
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10);
 
-        te.set_caller(admin);
-        te.set_value(1_000_000_000u64.into()); // 1 CSPR income to distribute
-        registry.distribute_income(1);
+        registry.env().set_caller(admin);
+        registry.with_tokens(U512::from(1_000_000_000u64)).distribute_income(1); // 1 CSPR income to distribute
 
         let offering = registry.get_offering(1);
         // 1_000_000_000 / 10 shares = 100_000_000 per share
@@ -432,20 +479,102 @@ mod tests {
     #[test]
     fn test_non_admin_cannot_distribute_income() {
         let (mut registry, admin, investor) = setup();
-        let te = TestEnv::new();
 
-        te.set_caller(admin);
+        registry.env().set_caller(admin);
         registry.create_offering(1, 100, 1_000_000_000u64);
 
-        te.set_caller(investor);
-        te.set_value(10_000_000_000u64.into());
-        registry.buy_shares(1, 10);
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10);
 
         // investor tries to distribute — should fail
-        te.set_value(1_000_000_000u64.into());
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            registry.distribute_income(1);
+            registry.with_tokens(U512::from(1_000_000_000u64)).distribute_income(1);
         }));
         assert!(result.is_err(), "Non-admin should not distribute income");
+    }
+
+    // ── Claim Income ───────────────────────────────────
+
+    #[test]
+    fn test_claim_income_pays_out_accrued_amount() {
+        let (mut registry, admin, investor) = setup();
+
+        registry.env().set_caller(admin);
+        registry.create_offering(1, 100, 1_000_000_000u64);
+
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10); // 10 shares
+
+        registry.env().set_caller(admin);
+        registry.with_tokens(U512::from(1_000_000_000u64)).distribute_income(1); // 1 CSPR income → 100_000_000/share
+
+        registry.env().set_caller(investor);
+        registry.claim_income(1);
+
+        assert_eq!(registry.get_claimed_per_share(1, investor), 100_000_000u64);
+    }
+
+    #[test]
+    fn test_claim_income_twice_without_new_distribution_reverts() {
+        let (mut registry, admin, investor) = setup();
+
+        registry.env().set_caller(admin);
+        registry.create_offering(1, 100, 1_000_000_000u64);
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10);
+
+        registry.env().set_caller(admin);
+        registry.with_tokens(U512::from(1_000_000_000u64)).distribute_income(1);
+
+        registry.env().set_caller(investor);
+        registry.claim_income(1); // first claim succeeds
+
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            registry.claim_income(1); // nothing new accrued
+        }));
+        assert!(result.is_err(), "Claiming again with no new distribution must revert");
+    }
+
+    #[test]
+    fn test_claim_income_accumulates_across_multiple_distributions() {
+        let (mut registry, admin, investor) = setup();
+
+        registry.env().set_caller(admin);
+        registry.create_offering(1, 100, 1_000_000_000u64);
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10);
+
+        // Two separate distributions before the investor ever claims.
+        registry.env().set_caller(admin);
+        registry.with_tokens(U512::from(1_000_000_000u64)).distribute_income(1); // +100_000_000/share
+        registry.with_tokens(U512::from(2_000_000_000u64)).distribute_income(1); // +200_000_000/share
+
+        registry.env().set_caller(investor);
+        registry.claim_income(1);
+
+        // Claimed high-water mark should reflect both distributions combined.
+        assert_eq!(registry.get_claimed_per_share(1, investor), 300_000_000u64);
+    }
+
+    #[test]
+    fn test_claim_income_by_non_shareholder_reverts() {
+        let (mut registry, admin, investor) = setup();
+        let outsider = registry.env().get_account(5);
+
+        registry.env().set_caller(admin);
+        registry.create_offering(1, 100, 1_000_000_000u64);
+
+        registry.env().set_caller(investor);
+        registry.with_tokens(U512::from(10_000_000_000u64)).buy_shares(1, 10);
+
+        registry.env().set_caller(admin);
+        registry.with_tokens(U512::from(1_000_000_000u64)).distribute_income(1);
+
+        // `outsider` holds zero shares in this offering.
+        registry.env().set_caller(outsider);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            registry.claim_income(1);
+        }));
+        assert!(result.is_err(), "A non-shareholder must not be able to claim income");
     }
 }
