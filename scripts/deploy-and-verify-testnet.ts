@@ -1,10 +1,15 @@
-import { 
-  CasperClient, 
-  CasperServiceByJsonRPC, 
-  DeployUtil, 
-  Keys, 
-  RuntimeArgs, 
-  CLValueBuilder 
+// DEPRECATED — targets the stale `integration-test.cspr.live` network and predates
+// the working v1/v2 deploy scripts. Superseded by deploy-v2-testnet.js and
+// deploy-v3-testnet.js, which target the real testnet node
+// (node.testnet.casper.network) and have actually deployed contracts
+// successfully. Do not extend this file — extend deploy-v3-testnet.js instead.
+import {
+  CasperClient,
+  CasperServiceByJsonRPC,
+  DeployUtil,
+  Keys,
+  RuntimeArgs,
+  CLValueBuilder
 } from 'casper-js-sdk';
 import * as fs from 'fs';
 import * as path from 'path';

@@ -1,0 +1,21 @@
+{
+  "network": "casper-test",
+  "deployer": "020394CCdB983b7B2a88486448E5d170F737A80264d32CaB99A3e2a3e01f33D6CEa1",
+  "contracts": {
+    "RentalEscrow": {
+      "deployHash": "24f8c1007a2d33915205e35d21c0274422c25758915ccb7843c76a420ba3f061",
+      "contractHash": "hash-d30c450cd71a08ae87fe20d29797ed9ad46e33f3bf967621a329b800ee0f039e",
+      "explorerUrl": "https://testnet.cspr.live/deploy/24f8c1007a2d33915205e35d21c0274422c25758915ccb7843c76a420ba3f061"
+    },
+    "CarbonCredit": {
+      "deployHash": "ece020fd29788916cd07a38a1428c8dfb170248b7a52c1e4126992f645dc544f",
+      "contractHash": "hash-77de8632404b808a26bdc8752411842704605af0db2b09628f93b234d51ef5a3",
+      "explorerUrl": "https://testnet.cspr.live/deploy/ece020fd29788916cd07a38a1428c8dfb170248b7a52c1e4126992f645dc544f"
+    },
+    "FractionalRegistry": {
+      "deployHash": "c57734aa220967b69a7b0eb6439681abd29142838f6b5564b78cdfa3cb8bea9c",
+      "contractHash": "hash-09b361855b80935e46c94caf71eb7ee4f6dd678be712d21bb61c507bdce367c1",
+      "explorerUrl": "https://testnet.cspr.live/deploy/c57734aa220967b69a7b0eb6439681abd29142838f6b5564b78cdfa3cb8bea9c"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "network": "casper-test",
+  "generatedAt": "2026-07-04T03:36:40.858Z",
+  "stateRootHash": "ff60dbcbc0f4a7c6ea4bbd747bd4b71dee4f80721a7e8cd56e322510018de6ca",
+  "deployerPublicKey": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+  "contracts": {
+    "AssetRegistry": "hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec",
+    "LendingPool": "hash-b5e7d69693481bfa851842abef55d96e69ebc91d8f2682391b362940d6c76ed1",
+    "RentalEscrow": "hash-90508cab9fd3b47ce752785d8fbb4e23d59cf73dfef09abcece1c2bc02b5e7f9",
+    "CarbonCredit": "hash-95dfa71608ce06624e791543fafb6e5cc5924b1928e2414ae83edb08659cb686",
+    "FractionalRegistry": "hash-420db8acf6991ae16515426d43f50a4215f58fa400724c9ffe4b61d04375271b"
+  },
+  "steps": [
+    {
+      "hop": "AssetRegistry deployed and queryable",
+      "status": "OK",
+      "detail": {
+        "contractHash": "hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec",
+        "storedValueType": "Contract",
+        "explorerUrl": "https://testnet.cspr.live/contract/1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec"
+      }
+    },
+    {
+      "hop": "LendingPool deployed and queryable",
+      "status": "OK",
+      "detail": {
+        "contractHash": "hash-b5e7d69693481bfa851842abef55d96e69ebc91d8f2682391b362940d6c76ed1",
+        "storedValueType": "Contract",
+        "explorerUrl": "https://testnet.cspr.live/contract/b5e7d69693481bfa851842abef55d96e69ebc91d8f2682391b362940d6c76ed1"
+      }
+    },
+    {
+      "hop": "RentalEscrow deployed and queryable",
+      "status": "OK",
+      "detail": {
+        "contractHash": "hash-90508cab9fd3b47ce752785d8fbb4e23d59cf73dfef09abcece1c2bc02b5e7f9",
+        "storedValueType": "Contract",
+        "explorerUrl": "https://testnet.cspr.live/contract/90508cab9fd3b47ce752785d8fbb4e23d59cf73dfef09abcece1c2bc02b5e7f9"
+      }
+    },
+    {
+      "hop": "CarbonCredit deployed and queryable",
+      "status": "OK",
+      "detail": {
+        "contractHash": "hash-95dfa71608ce06624e791543fafb6e5cc5924b1928e2414ae83edb08659cb686",
+        "storedValueType": "Contract",
+        "explorerUrl": "https://testnet.cspr.live/contract/95dfa71608ce06624e791543fafb6e5cc5924b1928e2414ae83edb08659cb686"
+      }
+    },
+    {
+      "hop": "FractionalRegistry deployed and queryable",
+      "status": "OK",
+      "detail": {
+        "contractHash": "hash-420db8acf6991ae16515426d43f50a4215f58fa400724c9ffe4b61d04375271b",
+        "storedValueType": "Contract",
+        "explorerUrl": "https://testnet.cspr.live/contract/420db8acf6991ae16515426d43f50a4215f58fa400724c9ffe4b61d04375271b"
+      }
+    },
+    {
+      "hop": "Deployer/agent wallet balance",
+      "status": "OK",
+      "detail": {
+        "balanceMotes": "0",
+        "balanceCspr": 0
+      }
+    },
+    {
+      "hop": "Mint asset (real mint_asset deploy)",
+      "status": "BLOCKED_INSUFFICIENT_FUNDS",
+      "detail": "Deployer wallet 020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1 has 0 CSPR. This hop needs a funded testnet wallet to submit a real signed deploy."
+    },
+    {
+      "hop": "Loan origination (real originate_loan deploy)",
+      "status": "BLOCKED_INSUFFICIENT_FUNDS",
+      "detail": "Deployer wallet 020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1 has 0 CSPR. This hop needs a funded testnet wallet to submit a real signed deploy."
+    },
+    {
+      "hop": "Rental start (real Ed25519-signed start_rental deploy)",
+      "status": "BLOCKED_INSUFFICIENT_FUNDS",
+      "detail": "Deployer wallet 020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1 has 0 CSPR. This hop needs a funded testnet wallet to submit a real signed deploy."
+    },
+    {
+      "hop": "Streaming payments (real x402 CSPR transfers)",
+      "status": "BLOCKED_INSUFFICIENT_FUNDS",
+      "detail": "Deployer wallet 020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1 has 0 CSPR. This hop needs a funded testnet wallet to submit a real signed deploy."
+    },
+    {
+      "hop": "Repayment / collateral release (real record_repayment + release_collateral)",
+      "status": "BLOCKED_INSUFFICIENT_FUNDS",
+      "detail": "Deployer wallet 020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1 has 0 CSPR. This hop needs a funded testnet wallet to submit a real signed deploy."
+    },
+    {
+      "hop": "Carbon issuance (real issue_cuc deploy)",
+      "status": "BLOCKED_INSUFFICIENT_FUNDS",
+      "detail": "Deployer wallet 020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1 has 0 CSPR. This hop needs a funded testnet wallet to submit a real signed deploy."
+    }
+  ],
+  "summary": {
+    "ok": 6,
+    "blocked": 6,
+    "error": 0
+  }
+}

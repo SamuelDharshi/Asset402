@@ -1,0 +1,23 @@
+{
+  "network": "casper-test",
+  "deployer": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+  "note": "Written manually because deploy-v3-testnet.js's --redeploy-v2 leg failed mid-run (wallet drained to 0 CSPR after these two real deploys) before its own fs.writeFileSync ran. Both entries below are real, independently confirmed testnet deploys — not reconstructed or guessed.",
+  "contracts": {
+    "LendingPool": {
+      "deployHash": "19d90edb4670dab12feafd54a615aad3000915ed7266dfbcd7f60893b6a7b994",
+      "contractHash": "hash-b5e7d69693481bfa851842abef55d96e69ebc91d8f2682391b362940d6c76ed1",
+      "explorerUrl": "https://testnet.cspr.live/deploy/19d90edb4670dab12feafd54a615aad3000915ed7266dfbcd7f60893b6a7b994",
+      "confirmedInBlock": 8389496
+    },
+    "RentalEscrow": {
+      "deployHash": "23b565ef58fe40cb970ac251bb1786175b7c3ebe6b1b82996a6bc79a5262ca10",
+      "contractHash": "hash-90508cab9fd3b47ce752785d8fbb4e23d59cf73dfef09abcece1c2bc02b5e7f9",
+      "explorerUrl": "https://testnet.cspr.live/deploy/23b565ef58fe40cb970ac251bb1786175b7c3ebe6b1b82996a6bc79a5262ca10",
+      "confirmedInBlock": 8389498
+    }
+  },
+  "blocked": {
+    "CarbonCredit_redeploy": "Insufficient funds — wallet balance is 0 CSPR as of this deploy run. Needs a testnet faucet top-up before retrying.",
+    "FractionalRegistry_redeploy": "Not attempted — same funding blocker as CarbonCredit above."
+  }
+}

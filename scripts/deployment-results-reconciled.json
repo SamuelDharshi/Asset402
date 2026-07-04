@@ -1,0 +1,18 @@
+{
+  "note": "Phase 0 reconciliation: resolves the apparent AssetRegistry hash discrepancy found during the pre-implementation audit.",
+  "finding": "Not a conflict. hash-941e7b72522da013fb6d0b173a87b258376b98bd0bc5217c3e1350573f90c138 is the Odra ContractPackage hash (written to the deployer account's named_keys as 'assetregistry' for upgradability). hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec is the concrete Contract entity hash — the one deploy-v2-testnet.js's extractContractHash() already extracts, and the one already consistently stored in agents/.env, backend/.env, and scripts/deployment-results.json.",
+  "verification": {
+    "queried_at_state_root": "4068c4e7d583c64f2722bae6b50ec8481259830090fe653c058edf747e93c334",
+    "hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec": {
+      "stored_value_type": "Contract",
+      "named_keys_sample": ["__events", "__events_ces_version", "__events_length", "__events_schema", "state"]
+    },
+    "hash-941e7b72522da013fb6d0b173a87b258376b98bd0bc5217c3e1350573f90c138": {
+      "stored_value_type": "ContractPackage",
+      "versions": 1
+    }
+  },
+  "canonical_asset_registry_contract_hash": "hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec",
+  "asset_registry_package_hash_for_reference": "hash-941e7b72522da013fb6d0b173a87b258376b98bd0bc5217c3e1350573f90c138",
+  "action_taken": "None required — existing .env files already reference the correct (concrete Contract) hash. RentalEscrow (Phase 2) will be initialized against this same canonical hash."
+}
