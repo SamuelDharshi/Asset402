@@ -223,6 +223,81 @@
       "mint_tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000",
       "created_at": "2026-07-04T03:34:02.813Z",
       "updated_at": "2026-07-04T03:34:02.813Z"
+    },
+    {
+      "id": "1783362886636",
+      "asset_id": 16,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Excavator",
+      "make": "Komatsu",
+      "model_est": "PC88MR",
+      "valuation_usd": 85000,
+      "condition_score": 82,
+      "ipfs_photo_hash": "QmTest",
+      "status": "Idle",
+      "mint_tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000",
+      "created_at": "2026-07-06T18:34:46.637Z",
+      "updated_at": "2026-07-06T18:34:46.637Z"
+    },
+    {
+      "id": "1783362914134",
+      "asset_id": 17,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Excavator",
+      "make": "Komatsu",
+      "model_est": "PC88MR",
+      "valuation_usd": 85000,
+      "condition_score": 82,
+      "ipfs_photo_hash": "QmTest",
+      "status": "Idle",
+      "mint_tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000",
+      "created_at": "2026-07-06T18:35:14.134Z",
+      "updated_at": "2026-07-06T18:35:14.134Z"
+    },
+    {
+      "id": "1783363050654",
+      "asset_id": 18,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Excavator",
+      "make": "Komatsu",
+      "model_est": "PC88MR",
+      "valuation_usd": 85000,
+      "condition_score": 82,
+      "ipfs_photo_hash": "QmTest",
+      "status": "Idle",
+      "mint_tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000",
+      "created_at": "2026-07-06T18:37:30.654Z",
+      "updated_at": "2026-07-06T18:37:30.654Z"
+    },
+    {
+      "id": "1783363114689",
+      "asset_id": 19,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Excavator",
+      "make": "Komatsu",
+      "model_est": "PC88MR",
+      "valuation_usd": 85000,
+      "condition_score": 82,
+      "ipfs_photo_hash": "QmTest",
+      "status": "Idle",
+      "mint_tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000",
+      "created_at": "2026-07-06T18:38:34.689Z",
+      "updated_at": "2026-07-06T18:38:34.689Z"
+    },
+    {
+      "id": "1783364375803",
+      "asset_id": 20,
+      "owner_address": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+      "asset_type": "Excavator",
+      "make": "Komatsu",
+      "model_est": "PC88MR",
+      "valuation_usd": 85000,
+      "condition_score": 82,
+      "ipfs_photo_hash": "QmTest",
+      "status": "Idle",
+      "mint_tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000",
+      "created_at": "2026-07-06T18:59:35.803Z",
+      "updated_at": "2026-07-06T18:59:35.803Z"
     }
   ],
   "loans": [
@@ -247,7 +322,7 @@
       "rate_per_minute": "68000000",
       "rate_usd_per_hour": 15,
       "duration_minutes": 60,
-      "total_streamed": "84317000000",
+      "total_streamed": "84367000000",
       "status": "Active",
       "started_at": "2026-06-29T04:15:54.612Z"
     }
@@ -1324,6 +1399,647 @@
         "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
         "signature": "mock_signature_test_abc123",
         "booking_ref": "MNT-1-MR5T5SW6"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362882120",
+      "timestamp": "2026-07-06T18:34:42.120Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_undefined_milliCUC",
+      "payload": {},
+      "status": "success"
+    },
+    {
+      "id": "1783362882138",
+      "timestamp": "2026-07-06T18:34:42.138Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "real_casper_eip712_sig_test",
+        "booking_ref": "MNT-1-MR9K7QL5"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362882153",
+      "timestamp": "2026-07-06T18:34:42.153Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 3,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_signature_xyz",
+        "booking_ref": "MNT-3-MR9K7QLI"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362884433",
+      "timestamp": "2026-07-06T18:34:44.433Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84322000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362884475",
+      "timestamp": "2026-07-06T18:34:44.475Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84327000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362884490",
+      "timestamp": "2026-07-06T18:34:44.490Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/stream/payment",
+      "payload": {
+        "message": "Cannot read properties of undefined (reading 'recipient')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1783362885461",
+      "timestamp": "2026-07-06T18:34:45.461Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MR9K7T5G"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362886617",
+      "timestamp": "2026-07-06T18:34:46.617Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_1000_milliCUC",
+      "payload": {
+        "rentalId": 1,
+        "assetId": 999,
+        "redeemAmountMilliCuc": 1000
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362886638",
+      "timestamp": "2026-07-06T18:34:46.638Z",
+      "agent_name": "OrchestratorAgent",
+      "action_performed": "mint_asset",
+      "payload": {
+        "assetId": 16,
+        "ownerPublicKey": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "assetType": "Excavator",
+        "make": "Komatsu",
+        "modelEst": "PC88MR",
+        "valuationUsd": 85000,
+        "conditionScore": 82,
+        "ipfsPhotoHash": "QmTest"
+      },
+      "status": "success",
+      "tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "1783362912559",
+      "timestamp": "2026-07-06T18:35:12.559Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_undefined_milliCUC",
+      "payload": {},
+      "status": "success"
+    },
+    {
+      "id": "1783362912571",
+      "timestamp": "2026-07-06T18:35:12.571Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "real_casper_eip712_sig_test",
+        "booking_ref": "MNT-1-MR9K8E2H"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362912579",
+      "timestamp": "2026-07-06T18:35:12.579Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 3,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_signature_xyz",
+        "booking_ref": "MNT-3-MR9K8E2P"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362913417",
+      "timestamp": "2026-07-06T18:35:13.417Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84332000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362913449",
+      "timestamp": "2026-07-06T18:35:13.449Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84337000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362913464",
+      "timestamp": "2026-07-06T18:35:13.464Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/stream/payment",
+      "payload": {
+        "message": "Cannot read properties of undefined (reading 'recipient')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1783362914112",
+      "timestamp": "2026-07-06T18:35:14.112Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_1000_milliCUC",
+      "payload": {
+        "rentalId": 1,
+        "assetId": 999,
+        "redeemAmountMilliCuc": 1000
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783362914136",
+      "timestamp": "2026-07-06T18:35:14.137Z",
+      "agent_name": "OrchestratorAgent",
+      "action_performed": "mint_asset",
+      "payload": {
+        "assetId": 17,
+        "ownerPublicKey": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "assetType": "Excavator",
+        "make": "Komatsu",
+        "modelEst": "PC88MR",
+        "valuationUsd": 85000,
+        "conditionScore": 82,
+        "ipfsPhotoHash": "QmTest"
+      },
+      "status": "success",
+      "tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "1783362915553",
+      "timestamp": "2026-07-06T18:35:15.553Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MR9K8GDC"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363047278",
+      "timestamp": "2026-07-06T18:37:27.278Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_undefined_milliCUC",
+      "payload": {},
+      "status": "success"
+    },
+    {
+      "id": "1783363047289",
+      "timestamp": "2026-07-06T18:37:27.289Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "real_casper_eip712_sig_test",
+        "booking_ref": "MNT-1-MR9KBA0N"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363047297",
+      "timestamp": "2026-07-06T18:37:27.297Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 3,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_signature_xyz",
+        "booking_ref": "MNT-3-MR9KBA0W"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363048186",
+      "timestamp": "2026-07-06T18:37:28.186Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84342000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363048215",
+      "timestamp": "2026-07-06T18:37:28.215Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84347000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363048230",
+      "timestamp": "2026-07-06T18:37:28.230Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/stream/payment",
+      "payload": {
+        "message": "Cannot read properties of undefined (reading 'recipient')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1783363048903",
+      "timestamp": "2026-07-06T18:37:28.903Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MR9KBB9I"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363050633",
+      "timestamp": "2026-07-06T18:37:30.633Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_1000_milliCUC",
+      "payload": {
+        "rentalId": 1,
+        "assetId": 999,
+        "redeemAmountMilliCuc": 1000
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363050657",
+      "timestamp": "2026-07-06T18:37:30.657Z",
+      "agent_name": "OrchestratorAgent",
+      "action_performed": "mint_asset",
+      "payload": {
+        "assetId": 18,
+        "ownerPublicKey": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "assetType": "Excavator",
+        "make": "Komatsu",
+        "modelEst": "PC88MR",
+        "valuationUsd": 85000,
+        "conditionScore": 82,
+        "ipfsPhotoHash": "QmTest"
+      },
+      "status": "success",
+      "tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "1783363113954",
+      "timestamp": "2026-07-06T18:38:33.954Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_undefined_milliCUC",
+      "payload": {},
+      "status": "success"
+    },
+    {
+      "id": "1783363113964",
+      "timestamp": "2026-07-06T18:38:33.965Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "real_casper_eip712_sig_test",
+        "booking_ref": "MNT-1-MR9KCPGR"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363113974",
+      "timestamp": "2026-07-06T18:38:33.974Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 2,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_casper_sig_xyz",
+        "booking_ref": "MNT-2-MR9KCPH1"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363113976",
+      "timestamp": "2026-07-06T18:38:33.976Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 4,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_casper_sig_xyz",
+        "booking_ref": "MNT-4-MR9KCPH3"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363114671",
+      "timestamp": "2026-07-06T18:38:34.671Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_1000_milliCUC",
+      "payload": {
+        "rentalId": 1,
+        "assetId": 999,
+        "redeemAmountMilliCuc": 1000
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363114691",
+      "timestamp": "2026-07-06T18:38:34.691Z",
+      "agent_name": "OrchestratorAgent",
+      "action_performed": "mint_asset",
+      "payload": {
+        "assetId": 19,
+        "ownerPublicKey": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "assetType": "Excavator",
+        "make": "Komatsu",
+        "modelEst": "PC88MR",
+        "valuationUsd": 85000,
+        "conditionScore": 82,
+        "ipfsPhotoHash": "QmTest"
+      },
+      "status": "success",
+      "tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "1783363115632",
+      "timestamp": "2026-07-06T18:38:35.632Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84352000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363115668",
+      "timestamp": "2026-07-06T18:38:35.668Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84357000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783363115687",
+      "timestamp": "2026-07-06T18:38:35.687Z",
+      "agent_name": "APIGateway",
+      "action_performed": "ERROR:/api/v1/stream/payment",
+      "payload": {
+        "message": "Cannot read properties of undefined (reading 'recipient')"
+      },
+      "status": "error"
+    },
+    {
+      "id": "1783363117744",
+      "timestamp": "2026-07-06T18:38:37.744Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MR9KCSDQ"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364372493",
+      "timestamp": "2026-07-06T18:59:32.493Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_undefined_milliCUC",
+      "payload": {},
+      "status": "success"
+    },
+    {
+      "id": "1783364372514",
+      "timestamp": "2026-07-06T18:59:32.514Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "real_casper_eip712_sig_test",
+        "booking_ref": "MNT-1-MR9L3OKF"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364372533",
+      "timestamp": "2026-07-06T18:59:32.533Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 2,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_casper_sig_xyz",
+        "booking_ref": "MNT-2-MR9L3OKZ"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364372536",
+      "timestamp": "2026-07-06T18:59:32.536Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 4,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "valid_casper_sig_xyz",
+        "booking_ref": "MNT-4-MR9L3OL2"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364373797",
+      "timestamp": "2026-07-06T18:59:33.798Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84362000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364373845",
+      "timestamp": "2026-07-06T18:59:33.845Z",
+      "agent_name": "CollectorAgent",
+      "action_performed": "stream_payment",
+      "payload": {
+        "rentalId": 101,
+        "assetId": 1,
+        "amountMotes": "5000000",
+        "split": {
+          "ownerMotes": "5000000",
+          "loanRepayMotes": "0",
+          "protocolFeeMotes": "0"
+        },
+        "loanStatus": "NoLoan",
+        "newTotalStreamed": "84367000000"
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364375784",
+      "timestamp": "2026-07-06T18:59:35.784Z",
+      "agent_name": "RedeemAgent",
+      "action_performed": "CUC_REDEEM_1000_milliCUC",
+      "payload": {
+        "rentalId": 1,
+        "assetId": 999,
+        "redeemAmountMilliCuc": 1000
+      },
+      "status": "success"
+    },
+    {
+      "id": "1783364375805",
+      "timestamp": "2026-07-06T18:59:35.805Z",
+      "agent_name": "OrchestratorAgent",
+      "action_performed": "mint_asset",
+      "payload": {
+        "assetId": 20,
+        "ownerPublicKey": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "assetType": "Excavator",
+        "make": "Komatsu",
+        "modelEst": "PC88MR",
+        "valuationUsd": 85000,
+        "conditionScore": 82,
+        "ipfsPhotoHash": "QmTest"
+      },
+      "status": "success",
+      "tx_hash": "realdeployhash00000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "1783364377727",
+      "timestamp": "2026-07-06T18:59:37.727Z",
+      "agent_name": "MaintenanceOracleAgent",
+      "action_performed": "maintenance_approved",
+      "payload": {
+        "asset_id": 1,
+        "approved_by": "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1",
+        "signature": "mock_signature_test_abc123",
+        "booking_ref": "MNT-1-MR9L3SL9"
       },
       "status": "success"
     }

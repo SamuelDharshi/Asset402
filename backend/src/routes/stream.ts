@@ -95,6 +95,14 @@ streamRouter.post('/payment', async (c) => {
   const body = await c.req.json<StreamPaymentBody>();
   const { rentalId, assetId, amountMotes, split, loanActive, paymentProof } = body;
 
+  // ── 0. Guard: paymentProof must be present and complete ───────────────────
+  if (!paymentProof || !paymentProof.deployHash || !paymentProof.signature || !paymentProof.recipient) {
+    return c.json({
+      error:  'Missing or incomplete paymentProof',
+      reason: 'paymentProof must include deployHash, signature, publicKey, recipient, amount, network, nonce',
+    }, 400);
+  }
+
   // ── 1. Verify the payment proof: real signature check + real on-chain
   // RPC confirmation that a matching transfer actually landed. This is only
   // called by CollectorAgent AFTER it has already executed the real
@@ -108,6 +116,7 @@ streamRouter.post('/payment', async (c) => {
   if (!verification.ok) {
     return c.json({ error: 'Invalid payment proof', reason: verification.reason }, 403);
   }
+
 
   // ── 2. Update rental total_streamed ────────────────────────────────────────
   const rental = await rentalRepo.findByRentalId(rentalId);
