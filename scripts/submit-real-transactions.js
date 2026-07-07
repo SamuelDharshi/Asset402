@@ -104,31 +104,24 @@ async function checkBalance(publicKeyHex) {
     const stateRootHash = stateResult.state_root_hash;
     const pk = CLPublicKey.fromHex(publicKeyHex);
     const accountHash = `account-hash-${Buffer.from(pk.toAccountHash()).toString('hex')}`;
-    const balanceResult = await rpcCall('state_get_balance', {
-      state_root_hash: stateRootHash,
-      purse_uref: accountHash,
+    
+    const result = await rpcCall('query_global_state', {
+      state_identifier: { StateRootHash: stateRootHash },
+      key: accountHash,
+      path: [],
     });
-    return BigInt(balanceResult?.balance_value ?? '0');
-  } catch {
-    // If balance query fails, try the query_global_state approach
-    try {
-      const stateResult = await rpcCall('chain_get_state_root_hash', {});
-      const pk = CLPublicKey.fromHex(publicKeyHex);
-      const accountHash = `account-hash-${Buffer.from(pk.toAccountHash()).toString('hex')}`;
-      const result = await rpcCall('query_global_state', {
-        state_identifier: { StateRootHash: stateResult.state_root_hash },
-        key: accountHash,
-        path: [],
+    
+    const purse = result?.stored_value?.Account?.main_purse;
+    if (purse) {
+      const balanceResult = await rpcCall('state_get_balance', {
+        state_root_hash: stateRootHash,
+        purse_uref: purse,
       });
-      const motes = result?.stored_value?.Account?.main_purse ?? null;
-      if (motes) {
-        const purseResult = await rpcCall('state_get_balance', {
-          state_root_hash: stateResult.state_root_hash,
-          purse_uref: motes,
-        });
-        return BigInt(purseResult?.balance_value ?? '0');
-      }
-    } catch {}
+      return BigInt(balanceResult?.balance_value ?? '0');
+    }
+    return 0n;
+  } catch (err) {
+    console.log(`   ⚠️ Balance check failed: ${err.message}`);
     return 0n;
   }
 }

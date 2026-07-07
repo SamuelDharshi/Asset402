@@ -1,0 +1,24 @@
+{
+  "network": "casper-test",
+  "generatedAt": "2026-07-07T03:55:44.592Z",
+  "deployer": "020394CCdB983b7B2a88486448E5d170F737A80264d32CaB99A3e2a3e01f33D6CEa1",
+  "transactions": {
+    "mintAsset": {
+      "deployHash": "07fd959c79b81fc2f7c0b412e5259343037797923b0fb1ef8d92785d8d14bb78",
+      "blockHeight": 8422031,
+      "explorerUrl": "https://testnet.cspr.live/deploy/07fd959c79b81fc2f7c0b412e5259343037797923b0fb1ef8d92785d8d14bb78",
+      "entryPoint": "mint_asset",
+      "contract": "AssetRegistry",
+      "contractHash": "hash-1120c2a6308ee3e60bcbc17771ec018f5ef9ba7d0322c55747d341ad752d50ec"
+    },
+    "issueCUC": {
+      "deployHash": "1cd01af28cee928b334cdf704a93ec9b071105a05b7f57b022a38acddf360ec2",
+      "blockHeight": 8422035,
+      "explorerUrl": "https://testnet.cspr.live/deploy/1cd01af28cee928b334cdf704a93ec9b071105a05b7f57b022a38acddf360ec2",
+      "entryPoint": "issue_cuc",
+      "contract": "CarbonCredit",
+      "contractHash": "hash-77de8632404b808a26bdc8752411842704605af0db2b09628f93b234d51ef5a3",
+      "cucIssued": 3200
+    }
+  }
+}

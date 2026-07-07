@@ -26,6 +26,10 @@
 
 **Deployer wallet:** [`020394ccdb...cea1`](https://testnet.cspr.live/account/020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1)
 
+### ⚡ Live Demo Transactions
+- **`mint_asset`** (AssetRegistry): [`07fd959c79b81fc2f7c0b412e5259343037797923b0fb1ef8d92785d8d14bb78`](https://testnet.cspr.live/deploy/07fd959c79b81fc2f7c0b412e5259343037797923b0fb1ef8d92785d8d14bb78) — Mints the "Komatsu PC88 Mini Excavator" RWA token on-chain.
+- **`issue_cuc`** (CarbonCredit): [`1cd01af28cee928b334cdf704a93ec9b071105a05b7f57b022a38acddf360ec2`](https://testnet.cspr.live/deploy/1cd01af28cee928b334cdf704a93ec9b071105a05b7f57b022a38acddf360ec2) — Issues 3.2 CUC for the 10.0-hour rental period to owner/renter addresses.
+
 ---
 
 ## 📖 1. The Core Idea: Real-World Asset (RWA) Metamorphosis
