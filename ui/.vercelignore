@@ -1,0 +1,8 @@
+node_modules
+.next
+.vercel
+.github
+tests
+playwright.config.ts
+pnpm-lock.yaml
+tsconfig.tsbuildinfo
