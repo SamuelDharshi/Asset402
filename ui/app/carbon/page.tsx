@@ -6,7 +6,7 @@ import { Footer } from '../../components/footer';
 import { CursorGlow } from '../../components/cursor-glow';
 import { Zap, Coins, ArrowRight, ShieldCheck } from 'lucide-react';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND = '';
 const CSPR_PER_CUC = 0.0234; 
 
 interface CUCBalance {

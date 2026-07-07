@@ -6,7 +6,7 @@ import { Footer } from '../../components/footer';
 import { CursorGlow } from '../../components/cursor-glow';
 import { Zap, Coins, ArrowUpRight, ShieldCheck, Heart } from 'lucide-react';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND = '';
 
 interface Offering {
   id: number;

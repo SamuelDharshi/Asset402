@@ -6,7 +6,7 @@ import { Footer } from '../../components/footer';
 import { CursorGlow } from '../../components/cursor-glow';
 import { MapPin, Star, Clock, ArrowUpRight } from 'lucide-react';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND = '';
 
 interface RentableAsset {
   asset_id: number;

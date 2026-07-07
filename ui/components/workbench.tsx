@@ -12,7 +12,7 @@ export function Workbench() {
     async function fetchLogs() {
       try {
         const address = "020394ccdb983b7b2a88486448e5d170f737a80264d32cab99a3e2a3e01f33d6cea1"
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+        const backendUrl = "";
         const res = await fetch(`${backendUrl}/api/v1/carbon/history/${address}`)
         if (res.ok) {
           const data = await res.json()

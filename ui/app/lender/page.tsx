@@ -5,7 +5,7 @@ import { Footer } from '../../components/footer';
 import { CursorGlow } from '../../components/cursor-glow';
 import { Zap, Coins, Info } from 'lucide-react';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND = '';
 
 interface Loan {
   loanId:         string;

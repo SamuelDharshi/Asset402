@@ -7,7 +7,7 @@ import { Footer } from '../../components/footer';
 import { CursorGlow } from '../../components/cursor-glow';
 import { Camera, CheckCircle2, Loader2, ExternalLink } from 'lucide-react';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND = '';
 
 interface VisionResult {
   assetType: string;
